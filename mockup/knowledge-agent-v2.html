@@ -517,14 +517,13 @@ const LV_META={
  2:{name:"L2 조건부 이용",short:"L2",desc:"출처표기·비상업 등 조건부 라이선스",act:"용도 대조 후 적재"},
  3:{name:"L3 라이선스 불명",short:"L3",desc:"권리 표기 없음 — 보호가 기본값",act:"사람 검토"},
  4:{name:"L4 명시적 제한",short:"L4",desc:"저작권 고지·페이월·재배포 금지",act:"차단 + 라이선스 문의"},
- 5:{name:"L5 접근 제한",short:"L5",desc:"로그인·페이월 우회가 필요한 접근",act:"수집 자체 차단"}};
+ 5:{name:"L5 접근 제한",short:"L5",desc:"로그인·페이월 우회가 필요한 접근",act:"수집 차단 · 기록 후 폐기"}};
 const ROUTE_META={
  uploaded:{label:"적재됨",tone:"ok",icon:"database"},
  staged:{label:"업로드 대기",tone:"navy",icon:"clock"},
  fetching:{label:"원본 확보 중",tone:"navy",icon:"loader-2"},
  review:{label:"검토",tone:"warn",icon:"bell-ring"},
  held:{label:"보류",tone:"risk",icon:"lock"},
- blocked:{label:"수집 차단",tone:"dark",icon:"shield-alert"},
  rejected:{label:"반려",tone:"mut",icon:"x"},
  pipeline:{label:"처리 중",tone:"navy",icon:"loader-2"}};
 
@@ -635,11 +634,11 @@ const SEED=[
    3) 판정 엔진 + 비가역 적재 플로우
       - 기본 레벨은 절대 덮어쓰지 않고 evaluate(기본 레벨 ⊕ 유효 라이선스 ⊕ 테넌트 정책)로 계산
       - 원본 확보·검증이 업로드의 전제조건 (원본 없이는 RAG·Viva로 못 감)
-      - SharePoint 업로드는 비가역: 안전장치는 사전 게이트(원본 대조·유예)와 사후 조치(인시던트)
-      [BACKEND] 검증 워커 · 원본 확보 워커 · 업로드 게이트웨이(멱등) · 인시던트 워크플로우
+      - SharePoint 업로드는 비가역: 안전장치는 사전 게이트(원본 대조·유예)뿐이며,
+        사후 삭제와 그 로그는 SharePoint 거버넌스 영역(Agent 밖)
+      [BACKEND] 검증 워커 · 원본 확보 워커 · 업로드 게이트웨이(멱등)
    ═════════════════════════════════════════════════════════════════ */
 DB.uploads=[];   /* 업로드 원장 — append-only. 무엇이 언제 어떤 근거로 올라갔는가 */
-DB.incidents=[]; /* 사후 조치 대장 — 회수 불가 세계의 보완재 */
 DB.settings.uploadDelaySec=60;  /* 업로드 유예 — 이 시간 동안만 취소 가능 (데모: 1분) */
 DB.settings.naming=true;        /* 파일명 규칙: 제목 + 불변 포인터 코드 */
 DB.settings.folderThreshold=75; /* R15: 폴더 매칭 신뢰도 임계 — 미만이면 자동 업로드 보류, 사람 확인 요구 */
@@ -750,7 +749,7 @@ function validLicenseFor(d){
 function evaluate(d){
   const R=[],entry=catEntry(d);if(entry)R.push("R02");
   const tag=r=>" ["+r.join("·")+"]";
-  if(d.lv===5)return{route:"blocked",rules:["R01"],why:"L5 — 접근 통제 우회가 필요해 수집 단계에서 차단"+tag(["R01"])};
+  if(d.lv===5)return{route:"blocked",rules:["R01"],why:"L5 — 접근통제 우회가 필요해 수집 차단 · 기록 후 폐기"+tag(["R01"])};
   const lic=validLicenseFor(d);
   if(lic){R.push("R10");return{route:"uploaded",lic:lic.id,rules:R,why:"기본 "+LV_META[d.lv].short+" ⊕ "+lic.id+" 적용 → 이용 가능"+tag(R)};}
   if(entry&&!entry.legalRef&&(entry.uses.ai==="r"||entry.uses.edu==="r")){R.push("R13");
@@ -826,16 +825,7 @@ function doUpload(d,by){
 function cancelStage(d,target,by,note){
   d.stagedUntil=null;transition(d,target,by,note||"대기 시간 내 업로드 취소");
 }
-/* ── 인시던트: 회수가 불가능하므로, 사후 문제는 추적 가능한 수동 조치로 ── */
-let _inc=0;
-function addIncident(kind,desc,docId,licId){
-  if(DB.incidents.some(i=>i.kind===kind&&i.docId===docId&&i.status!=="resolved"))return null;
-  const inc={id:"INC-"+String(++_inc).padStart(3,"0"),t:nowHM(),kind,desc,docId:docId||null,licId:licId||null,status:"open",log:[{t:nowHM(),msg:"생성 — "+desc}]};
-  DB.incidents.unshift(inc);
-  const doc=docId?DB.docs.find(x=>x.id===docId):null;
-  audit(doc?doc.title:"—","인시던트 생성: "+kind,"시스템(사후 조치)",desc);
-  return inc;
-}
+/* 충돌 스캔 — 계약 소멸 시 연결 소스 자동 중지. 기적재분의 삭제·추적은 SharePoint 거버넌스 영역(Agent 밖). */
 function scanConflicts(){
   DB.settings.sources.forEach(s=>{
     if(!s.licenseId||!s.on)return;
@@ -843,20 +833,12 @@ function scanConflicts(){
     const st=licStatus(l).k;
     if(l.revoked||st==="expired"){s.on=false;audit("—","소스 자동 중지: "+s.name,"시스템(권리 원장)",s.licenseId+" "+(l.revoked?"해지":"만료")+" — 계약 소스의 수집을 중지");}
   });
-  DB.docs.filter(d=>d.state==="uploaded"&&d.appliedLic).forEach(d=>{
-    const l=DB.licenses.find(x=>x.id===d.appliedLic);if(!l)return;
-    const st=licStatus(l).k;
-    if((l.revoked||st==="expired")&&!l.survival)
-      addIncident("라이선스 소멸 · 잔존 조항 없음",l.id+" "+(l.revoked?"해지":"만료")+" — 기적재분 「"+d.title.slice(0,18)+"…」은 회수 불가, 수동 삭제 필요",d.id,l.id);
-    else if(st==="expiring"&&!l.survival)
-      addIncident("만료 임박 · 잔존 조항 없음",l.id+" 만료 "+licStatus(l).label+" — 갱신 실패 시 기적재분이 위반 상태로 영구화됩니다. 갱신 협상 또는 잔존 조항 추가 확보 필요",d.id,l.id);
-  });
 }
-/* 재평가 — 미결(검토·보류·차단) 문서만 대상. 업로드분은 비가역이므로 재평가 대신 충돌 스캔. */
+/* 재평가 — 미결(검토·보류) 문서만 대상. 업로드분은 비가역이므로 재평가 대상이 아님. */
 function reEvaluateAll(by,trigger){
   let changed=0;
   DB.docs.forEach(d=>{
-    if(!["review","held","blocked"].includes(d.state))return;
+    if(!["review","held"].includes(d.state))return;
     if(d.manual&&d.manual.route==="rejected")return;
     const ev=evaluate(d);
     if(ev.route==="uploaded"){changed++;beginFetch(d,by,ev,trigger);}
@@ -900,6 +882,10 @@ SEED.forEach((s,i)=>{
     d.state="uploaded";d.spName=fileNameFor(d);d.uploadedAt=d.time;d.dist=distFor(d);
     DB.uploads.push({t:d.time,doc:d.title,name:d.spName,hash:d.fileMeta.hash,lic:d.appliedLic||"—",folder:DB.settings.catMap[d.cat]||DB.settings.folders[0]});
     d.history.push({t:d.time,from:"업로드 대기",to:"SharePoint 업로드(비가역)",by:"시스템",note:"파일명 "+d.spName});
+  }else if(ev.route==="blocked"){
+    /* L5 접근통제 — 문서 레코드를 남기지 않는다: 감사 로그에 기록만 하고 폐기 (사람 검토行 미진입) */
+    DB.docs.pop();
+    audit(d.title,"수집 차단 — 기록 후 폐기","시스템(수집 필터)",ev.why+" · 출처 "+d.source+" · 원문 미저장, 사람 검토 없이 종료");
   }else{
     d.state=ev.route;
     if(x&&x.fetchFail)d.fetchFail=x.fetchFail;
@@ -937,11 +923,8 @@ SEED.forEach((s,i)=>{
   DB.docs.unshift(d);
 })();
 audit("—","표준 카탈로그 업데이트 v2026.07 — 신규 15개 항목","시스템(카탈로그)","공공누리 0·AI유형 · CC SA 계열 · ODC/오픈소스 · 보호 제외 저작물 · AI 학습 금지 약관 · 기밀/개인정보/불법 출처");
-audit("—","오늘 첫 동기화 완료 · "+DB.docs.length+"건 수집","시스템","레벨 분포: L1×5 · L2×2 · L3×2 · L4×5 · L5×1");
-scanConflicts(); /* LIC-002 D-9 · 잔존 조항 없음 → 인시던트 자동 생성 */
-DB.incidents.push({id:"INC-000",t:"08:12",kind:"오적재 신고 (처리 완료 예시)",docId:null,licId:null,
- desc:"구형 카탈로그 v1이 잘못된 폴더로 업로드 — 회수 불가하여 SharePoint·Viva 관리자 수동 삭제로 조치",
- status:"resolved",log:[{t:"08:12",msg:"신고 접수"},{t:"08:40",msg:"SharePoint·Viva 관리자에 삭제 요청 발송"},{t:"09:05",msg:"삭제 확인 · RAG 재인덱싱 확인 · 종결"}]});
+audit("—","오늘 첫 동기화 완료 · "+DB.docs.length+"건 수집","시스템","레벨 분포: L1×5 · L2×2 · L3×2 · L4×5 · 접근통제(L5) 1건은 차단·폐기");
+scanConflicts(); /* 계약 소멸 소스 자동 중지 점검 */
 /* ═════════════════════════════════════════════════════════════════
    4) 뷰 렌더링
    ═════════════════════════════════════════════════════════════════ */
@@ -976,11 +959,10 @@ function fileBadge(d){
 function remainSec(d){return Math.max(0,Math.ceil((d.stagedUntil-Date.now())/1000));}
 function cdFmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
 function counts(){
-  const c={total:DB.docs.length,uploaded:0,review:0,held:0,blocked:0,rejected:0,staged:0,fetching:0,rag:0,viva:0};
+  const c={total:DB.docs.length,uploaded:0,review:0,held:0,rejected:0,staged:0,fetching:0,rag:0,viva:0};
   DB.docs.forEach(d=>{if(c[d.state]!==undefined)c[d.state]++;
     if(d.state==="uploaded"&&d.dist){if(d.dist.rag)c.rag++;if(d.dist.viva)c.viva++;}});
   c.expiring=DB.licenses.filter(l=>licStatus(l).k==="expiring").length;
-  c.incOpen=DB.incidents.filter(i=>i.status!=="resolved").length;
   return c;}
 
 function render(){
@@ -1001,7 +983,7 @@ function render(){
     kpi("ok","database","적재 (비가역)",c.uploaded,"RAG·Viva 동시 배포 — 분리 불가","archive")+
     kpi("warn","bell-ring","검토 대기",c.review,"사람 판단 필요","queue")+
     kpi("navy","clock","업로드 대기",c.staged+c.fetching,"확보 중 "+c.fetching+" · 대기 "+c.staged+" — 취소 가능 구간","staging")+
-    kpi("risk","alert-triangle","사후 조치",c.incOpen,"회수 불가분 수동 조치 추적","incidents")+
+    kpi("risk","lock","보류",c.held,"권리 확보 대기 — 원장 등록 시 자동 재개","hold")+
   '</div>'+
   (syncing?'<div class="sync">'+ic("loader-2",15,"spin")+'<span id="syncmsg">파이프라인 가동 중…</span><div class="bar"><span id="syncbar"></span></div></div>':'')+
   pipeHTML(c)+
@@ -1011,9 +993,8 @@ function render(){
     tabBtn("log","inbox","수집 로그",c.total)+
     tabBtn("staging","clock","업로드 대기",c.staged+c.fetching)+
     tabBtn("archive","database","적재함",c.uploaded)+
-    tabBtn("hold","lock","보류·차단",c.held+c.blocked)+
+    tabBtn("hold","lock","보류",c.held)+
     tabBtn("ledger","book-key","권리 원장",DB.licenses.filter(l=>!l.revoked).length)+
-    tabBtn("incidents","alert-triangle","사후 조치",c.incOpen)+
     tabBtn("audit","history","감사 로그",DB.audit.length)+
   '</div><div class="view" id="view"></div>';
   renderView();
@@ -1053,7 +1034,6 @@ function renderView(){
   else if(activeView==="archive")el.innerHTML=archiveHTML();
   else if(activeView==="hold")el.innerHTML=holdHTML();
   else if(activeView==="ledger")el.innerHTML=ledgerHTML();
-  else if(activeView==="incidents")el.innerHTML=incidentsHTML();
   else el.innerHTML=auditHTML();
 }
 
@@ -1101,7 +1081,7 @@ function reviewCard(d,prioChip){
 
 /* ── 수집 로그 ── */
 function logHTML(){
-  const filters=[["all","전체"],["uploaded","적재"],["wait","확보·대기"],["review","검토"],["held","보류"],["blocked","차단"],["rejected","반려"]];
+  const filters=[["all","전체"],["uploaded","적재"],["wait","확보·대기"],["review","검토"],["held","보류"],["rejected","반려"]];
   let list=DB.docs.slice().sort((a,b)=>a.time<b.time?1:-1);
   if(logFilter==="wait")list=list.filter(d=>d.state==="staged"||d.state==="fetching");
   else if(logFilter!=="all")list=list.filter(d=>d.state===logFilter);
@@ -1161,7 +1141,7 @@ function cancelStageUI(id){const d=DB.docs.find(x=>x.id===id);if(!d)return;
 function archiveHTML(){
   const list=DB.docs.filter(d=>d.state==="uploaded").sort((a,b)=>a.time<b.time?1:-1);
   if(!list.length)return '<div class="empty">아직 적재된 자료가 없습니다.</div>';
-  return '<div style="font-size:12px;color:var(--t3);margin-bottom:11px">'+ic("lock",11)+' 업로드분은 회수할 수 없습니다. 문제가 있으면 <b>문제 신고</b>로 사후 조치 대장에 등록하세요. 파일명의 [AI365-ID·레벨·LIC] 코드로 권리 원장·업로드 원장을 역추적합니다.</div>'+
+  return '<div style="font-size:12px;color:var(--t3);margin-bottom:11px">'+ic("lock",11)+' 업로드분은 회수할 수 없습니다. 사후 삭제가 필요하면 SharePoint·Viva 관리자의 수동 절차로 처리하세요(로그 포함 — Agent 관리 영역 밖). 파일명의 [AI365-ID·레벨·LIC] 코드로 권리 원장·업로드 원장을 역추적합니다.</div>'+
    '<div class="feed">'+list.map(d=>{
     const lic=d.appliedLic?DB.licenses.find(l=>l.id===d.appliedLic):null;
     const folder=DB.settings.catMap[d.cat]||DB.settings.folders[0];
@@ -1175,31 +1155,30 @@ function archiveHTML(){
      '<div class="fitem-r">'+lvBadge(d.lv)+
      '<span class="dist sp">'+ic("database",9)+'SP</span><span class="dist on">'+ic("bot",9)+'RAG</span>'+
      '<span class="dist on">'+ic("check",9)+'Viva</span>'+
-     '<button class="rbtn risk" onclick="event.stopPropagation();openIncForm(\''+d.id+'\')">'+ic("alert-triangle",12)+'문제 신고</button></div></div>';
+     '</div></div>';
   }).join("")+'</div>';
 }
 
-/* ── 보류·차단함 ── */
+/* ── 보류함 ── */
 function holdHTML(){
-  const list=DB.docs.filter(d=>d.state==="held"||d.state==="blocked").sort((a,b)=>(a.state===b.state)?0:(a.state==="held"?-1:1));
-  if(!list.length)return '<div class="empty">보류·차단 중인 자료가 없습니다.</div>';
+  const list=DB.docs.filter(d=>d.state==="held");
+  if(!list.length)return '<div class="empty">보류 중인 자료가 없습니다.</div>';
   return '<div class="grid2">'+list.map(d=>{
-    const blocked=d.state==="blocked";
     return '<div class="rcard" data-id="'+d.id+'">'+
      '<div class="rcard-top"><div style="flex:1;min-width:0"><div class="rcard-title">'+esc(d.title)+'</div>'+
        '<div class="rcard-src"><span class="tpill">'+esc(d.type)+'</span>'+esc(d.source)+'</div></div>'+routeChip(d.state)+'</div>'+
      '<div class="chipline">'+lvBadge(d.lv)+'<span class="sig">'+ic("scan-text",10)+esc(d.lic)+'</span></div>'+
      '<div class="chipline">'+catChip(d)+rulesChip(d)+'</div>'+
      eqChip(d)+
-     '<div class="rcard-why'+(blocked?" r5":" r4")+'">'+ic(blocked?"shield-alert":"lock",13)+'<span>'+esc(d.evalWhy||"")+'</span></div>'+
-     (blocked?'':'<div class="rcard-act">'+ic("arrow-right",13)+'<span><b>다음 행동:</b> 권리 원장에 라이선스를 등록하면 자동 재평가 → 원본 확보 → 업로드 대기로 이동합니다.</span></div>')+
+     '<div class="rcard-why r4">'+ic("lock",13)+'<span>'+esc(d.evalWhy||"")+'</span></div>'+
+     '<div class="rcard-act">'+ic("arrow-right",13)+'<span><b>다음 행동:</b> 권리 원장에 라이선스를 등록하면 자동 재평가 → 원본 확보 → 업로드 대기로 이동합니다.</span></div>'+
      (d.contact?'<div class="contact">'+ic("mail",12)+'권리 문의처 <b>'+esc(d.contact)+'</b><button class="rbtn" onclick="openMail(\''+d.id+'\')">'+ic("mail",12)+'문의 초안</button></div>':'')+
-     (blocked?'':'<div class="hold-prog">'+ic(d.progress?"loader-2":"clock",12,d.progress?"spin":"")+'라이선스 확보 진행'+
-       '<button class="sw'+(d.progress?" on":"")+'" onclick="toggleProg(\''+d.id+'\')" aria-label="확보 진행 여부"></button></div>')+
+     '<div class="hold-prog">'+ic(d.progress?"loader-2":"clock",12,d.progress?"spin":"")+'라이선스 확보 진행'+
+       '<button class="sw'+(d.progress?" on":"")+'" onclick="toggleProg(\''+d.id+'\')" aria-label="확보 진행 여부"></button></div>'+
      '<div class="rcard-btns">'+
        '<button class="rbtn" onclick="openDetail(\''+d.id+'\')">'+ic("camera",13)+' 근거 스냅샷</button>'+
-       (blocked?'':'<button class="rbtn ok" onclick="openLicForm(\''+esc(d.source)+'\')">'+ic("book-key",13)+' 라이선스 등록</button>'+
-       '<button class="rbtn risk" onclick="openDecision(\''+d.id+'\',\'reject\')">'+ic("x",13)+' 반려</button>')+
+       '<button class="rbtn ok" onclick="openLicForm(\''+esc(d.source)+'\')">'+ic("book-key",13)+' 라이선스 등록</button>'+
+       '<button class="rbtn risk" onclick="openDecision(\''+d.id+'\',\'reject\')">'+ic("x",13)+' 반려</button>'+
      '</div></div>';
   }).join("")+'</div>';
 }
@@ -1216,7 +1195,7 @@ function ledgerHTML(){
    '<button class="fchip'+(ledgerMode==="lic"?" active":"")+'" onclick="ledgerMode=\'lic\';renderView()">계약 원장 '+active.length+'</button>'+
    '<button class="fchip'+(ledgerMode==="cat"?" active":"")+'" onclick="ledgerMode=\'cat\';renderView()">표준 카탈로그 '+CATALOG.length+'</button></div>';
   if(ledgerMode==="cat")return modeBar+catalogHTML();
-  let html=modeBar+'<div class="toolbar"><span style="font-size:12.5px;color:var(--t2);line-height:1.6">라이선스는 문서와 별개로 관리되는 살아 있는 권리 기록입니다. <b>업로드는 비가역</b>이므로: 만료·해지되어도 기적재분은 회수되지 않습니다 — <b>잔존 조항(survival clause)</b>이 없으면 만료 시 인시던트가 생성됩니다. 등록 시 보류함이 자동 재평가됩니다.</span>'+
+  let html=modeBar+'<div class="toolbar"><span style="font-size:12.5px;color:var(--t2);line-height:1.6">라이선스는 문서와 별개로 관리되는 살아 있는 권리 기록입니다. <b>업로드는 비가역</b>이므로: 만료·해지되어도 기적재분은 회수되지 않습니다 — <b>잔존 조항(survival clause)</b>이 없으면 만료 시 기적재분이 위반 리스크로 영구화됩니다. 등록 시 보류함이 자동 재평가됩니다.</span>'+
    '<button class="btn primary sm" style="margin-left:auto" onclick="openLicForm()">'+ic("plus",13)+'라이선스 등록</button></div>';
   html+='<div class="lic-grid">'+active.map(l=>{
     const st=licStatus(l);
@@ -1230,7 +1209,7 @@ function ledgerHTML(){
      '<div class="lic-row"><b>의무</b><span>'+esc(l.obligations)+'</span></div>'+
      '<div class="lic-row"><b>근거</b><span>'+ic("file-text",11)+' '+esc(l.file)+' · 문의 '+esc(l.contact)+'</span></div>'+
      '<div class="lic-docs">'+ic("database",12)+' 이 라이선스 기반 적재·대기 문서 <b>'+docs.length+'건</b>'+(docs.length?' — '+esc(docs[0].title.slice(0,22))+(docs.length>1?" 외":""):"")+'</div>'+
-     '<div class="rcard-btns"><button class="rbtn risk" onclick="revokeLic(\''+l.id+'\')">'+ic("x",13)+' 해지 — 신규 적재 중단'+(l.survival?'':' · 기적재분 인시던트')+'</button></div></div>';
+     '<div class="rcard-btns"><button class="rbtn risk" onclick="revokeLic(\''+l.id+'\')">'+ic("x",13)+' 해지 — 신규 적재 중단'+(l.survival?'':' · 기적재분 위반 리스크')+'</button></div></div>';
   }).join("")+'</div>';
   if(revoked.length)html+='<div style="margin-top:14px;font-size:12px;color:var(--t3)">해지됨: '+revoked.map(l=>esc(l.id)).join(", ")+' — 이력은 감사 로그·업로드 원장에 보존됩니다.</div>';
   return html;
@@ -1268,43 +1247,16 @@ function revokeLic(id){
    "<b>"+esc(l.id)+" · "+esc(l.name)+"</b>를 해지합니다.<br><br>"+
    "· 신규 적재는 즉시 중단됩니다.<br>"+
    "· 업로드 대기 중 "+stg+"건은 아직 취소 가능해 <b>보류로 복귀</b>합니다.<br>"+
-   "· 이미 업로드된 "+up+"건은 <b>회수할 수 없으며</b>"+(l.survival?" 잔존 조항으로 유지가 허용됩니다.":" 잔존 조항이 없어 <b>인시던트가 생성</b>됩니다 — 수동 삭제 조치가 필요합니다.")+"<br><br>계속할까요?",
+   "· 이미 업로드된 "+up+"건은 <b>회수할 수 없으며</b>"+(l.survival?" 잔존 조항으로 유지가 허용됩니다.":" 잔존 조항이 없어 <b>위반 리스크로 영구화</b>됩니다 — 삭제가 필요하면 SharePoint 관리자 수동 절차로 처리하세요.")+"<br><br>계속할까요?",
    function(){
     l.revoked=true;audit("—","라이선스 해지: "+l.id,"관리자","권리 원장에서 해지");
     DB.settings.sources.forEach(s=>{if(s.licenseId===l.id&&s.on){s.on=false;audit("—","소스 자동 중지: "+s.name,"시스템(권리 원장)",l.id+" 해지 — 계약 소스의 수집을 중지");}});
     DB.docs.filter(d=>d.appliedLic===l.id&&d.state==="staged").forEach(d=>cancelStage(d,"held","시스템(권리 원장)","라이선스 해지로 대기 중 업로드 취소 — 보류 복귀"));
     const n=reEvaluateAll("시스템(권리 원장)","라이선스 "+l.id+" 해지 재평가");
-    toastMsg("해지 완료 — 미결 "+n+"건 재평가"+(l.survival?"":" · 기적재분 인시던트 생성"));render();
+    toastMsg("해지 완료 — 미결 "+n+"건 재평가"+(l.survival?"":" · 기적재분은 위반 리스크로 기록됨"));render();
   });
 }
 
-/* ── 사후 조치 대장 ── */
-function incidentsHTML(){
-  if(!DB.incidents.length)return '<div class="empty">사후 조치가 필요한 항목이 없습니다.</div>';
-  const stMeta={open:["조치 필요","warnd"],requested:["삭제 요청됨","okd"],resolved:["조치 완료","exp"]};
-  return '<div style="font-size:12px;color:var(--t3);margin-bottom:11px">시스템은 업로드분을 지울 수 없으므로, 문제 발생분은 여기서 <b>SharePoint·Viva 관리자 대상 수동 조치</b>로 추적합니다.</div>'+
-   '<div class="lic-grid">'+DB.incidents.map(inc=>{
-    const doc=inc.docId?DB.docs.find(d=>d.id===inc.docId):null;
-    const m=stMeta[inc.status];
-    return '<div class="lic-card"><div class="lic-h"><div><div class="lic-id">'+esc(inc.id)+' · '+esc(inc.t)+'</div><div class="lic-name">'+esc(inc.kind)+'</div></div>'+
-     '<span class="dday '+m[1]+'">'+m[0]+'</span></div>'+
-     (doc?'<div class="lic-row"><b>문서</b><span>'+esc(doc.title)+' <span class="fn">'+esc(doc.spName||"")+'</span></span></div>':'')+
-     '<div class="lic-row"><b>내용</b><span>'+esc(inc.desc)+'</span></div>'+
-     '<div class="lic-row"><b>이력</b><span>'+inc.log.map(g=>esc(g.t)+" "+esc(g.msg)).join("<br>")+'</span></div>'+
-     '<div class="rcard-btns">'+
-      (inc.status==="open"?'<button class="rbtn ok" onclick="incStep(\''+inc.id+'\',\'requested\')">'+ic("mail",13)+' SP·Viva 관리자에 삭제 요청</button>':'')+
-      (inc.status==="requested"?'<button class="rbtn ok" onclick="incStep(\''+inc.id+'\',\'resolved\')">'+ic("check-check",13)+' 조치 확인 · 종결</button>':'')+
-     '</div></div>';
-  }).join("")+'</div>';
-}
-function incStep(id,to){
-  const inc=DB.incidents.find(i=>i.id===id);if(!inc)return;
-  inc.status=to;
-  const msg=to==="requested"?"SharePoint·Viva 관리자에 수동 삭제 요청 발송":"삭제·재인덱싱 확인 — 종결";
-  inc.log.push({t:nowHM(),msg});
-  audit(inc.docId?(DB.docs.find(d=>d.id===inc.docId)||{}).title||"—":"—","인시던트 "+inc.id+": "+msg,"관리자","");
-  toastMsg(msg);render();
-}
 
 /* ── 감사 로그 ── */
 function auditByCls(by){return by==="관리자"?"hu":(String(by).indexOf("시스템")===0?"sys":"ai");}
@@ -1315,7 +1267,7 @@ function auditHTML(){
   if(auditQ)list=list.filter(a=>(((a.doc||"")+" "+a.move+" "+(a.note||"")).toLowerCase().indexOf(auditQ.toLowerCase())>=0));
   return '<div class="toolbar">'+F.map(f=>'<button class="fchip'+(auditBy===f[0]?" active":"")+'" onclick="setAuditBy(\''+f[0]+'\')">'+f[1]+'</button>').join("")+
    '<input class="searchbox" placeholder="문서·내용 검색" value="'+esc(auditQ)+'" oninput="setAuditQ(this.value)" /></div>'+
-   '<div style="font-size:12px;color:var(--t3);margin-bottom:10px">모든 상태 전이·정책 변경·라이선스·업로드·인시던트 이벤트가 근거와 함께 남습니다. 업로드 원장 '+DB.uploads.length+'건 포함 — 기록은 수정·삭제되지 않습니다.</div>'+
+   '<div style="font-size:12px;color:var(--t3);margin-bottom:10px">모든 상태 전이·정책 변경·라이선스·업로드 이벤트가 근거와 함께 남습니다. 업로드 원장 '+DB.uploads.length+'건 포함 — 기록은 수정·삭제되지 않습니다.</div>'+
    (list.length?'<div class="audit">'+list.map(a=>{
     const byCls=auditByCls(a.by);
     return '<div class="a-item"><span class="a-time">'+esc(a.t)+'</span><span class="a-body">'+(a.doc&&a.doc!=="—"?'<b>'+esc(a.doc)+'</b> — ':'')+esc(a.move)+(a.note?' <span style="color:var(--t3)">· '+esc(a.note)+'</span>':'')+'</span><span class="a-by '+byCls+'">'+esc(a.by)+'</span></div>';
@@ -1334,7 +1286,6 @@ function renderDialog(){
   if(dialog.type==="detail")inner=detailDlg();
   else if(dialog.type==="decision")inner=decisionDlg();
   else if(dialog.type==="upconfirm")inner=upconfirmDlg();
-  else if(dialog.type==="incform")inner=incformDlg();
   else if(dialog.type==="mail")inner=mailDlg();
   else if(dialog.type==="lic")inner=licDlg();
   else if(dialog.type==="src")inner=srcDlg();
@@ -1410,7 +1361,7 @@ function distGroup(d){
     '<div class="mir-row"><b>SharePoint (원본)</b><span class="mir-sys">/SharePoint/'+esc(p)+'/'+esc(d.spName||"")+' — 적재됨 · 비가역</span></div>'+
     '<div class="mir-row"><b>사내 AI RAG</b><span class="mir-sys">rag://kb/'+esc(p)+' — 동시 업로드됨</span></div>'+
     '<div class="mir-row"><b>Viva Learning</b><span class="mir-sys">viva://'+esc(p)+' — 동시 업로드됨</span></div></div>'+
-   '<div class="setgrp-d">SharePoint 업로드 순간 RAG·Viva에 <b>동시에 올라가며 선택적 제외가 불가능</b>합니다. 그래서 업로드 자격 판정이 세 용도(열람·AI·교육)를 전부 요구하고, 개별 회수도 불가능해 문제는 사후 조치 대장으로 추적합니다.</div></div>';
+   '<div class="setgrp-d">SharePoint 업로드 순간 RAG·Viva에 <b>동시에 올라가며 선택적 제외가 불가능</b>합니다. 그래서 업로드 자격 판정이 세 용도(열람·AI·교육)를 전부 요구합니다. 사후 삭제가 필요하면 SharePoint·Viva 관리자의 수동 절차로 처리합니다(Agent 관리 영역 밖).</div></div>';
 }
 
 /* 승인·반려 — 사유 필수. 승인 = 즉시 업로드가 아니라 '원본 확보 → 유예 대기' 진입 */
@@ -1465,7 +1416,7 @@ function upconfirmDlg(){
   '<div class="modal-body"><div style="font-size:13px"><b>'+esc(d.title)+'</b></div>'+
    '<div class="fn">'+ic("file-text",10)+' '+esc(fileNameFor(d))+'</div>'+
    '<div class="mirror">'+rows.map(r=>'<div class="mir-row"><b>'+r[0]+'</b><span class="mir-sys" style="'+(r[2]?"":"color:var(--risk);font-weight:700")+'">'+(r[2]?"✓ ":"✕ ")+r[1]+'</span></div>').join("")+'</div>'+
-   '<div class="warnbox">'+ic("alert-triangle",14)+' 업로드하면 즉시 RAG·Viva Learning으로 전파되며 <b>삭제·회수할 수 없습니다.</b> 이후 문제는 사후 조치 대장(수동 삭제 요청)으로만 처리됩니다.</div>'+
+   '<div class="warnbox">'+ic("alert-triangle",14)+' 업로드하면 즉시 RAG·Viva Learning으로 전파되며 <b>삭제·회수할 수 없습니다.</b> 이후 삭제가 필요하면 SharePoint·Viva 관리자의 수동 절차로만 처리됩니다.</div>'+
    '<label style="display:flex;gap:8px;align-items:center;font-size:12.5px;font-weight:600;cursor:pointer"><input type="checkbox" onchange="dialog.ack=this.checked;document.getElementById(\'up-go\').disabled=!this.checked" /> 비가역성을 이해했으며 업로드를 확정합니다</label>'+
   '</div><div class="modal-f"><button class="btn" onclick="closeDlg()">취소</button>'+
    '<button class="btn primary" id="up-go" disabled onclick="confirmUpload()">'+ic("check",13)+'SharePoint 업로드 확정</button></div></div>';
@@ -1476,24 +1427,6 @@ function confirmUpload(){
   doUpload(d,"관리자");toastMsg("업로드 확정 — RAG·Viva로 배포되었습니다 (비가역)");render();
 }
 
-/* 문제 신고 → 인시던트 생성 */
-function openIncForm(docId){dialog={type:"incform",docId};renderDialog();}
-function incformDlg(){
-  const d=DB.docs.find(x=>x.id===dialog.docId);
-  return '<div class="modal sm" role="dialog" aria-modal="true"><div class="modal-h">'+ic("alert-triangle",16)+'문제 신고 — 사후 조치 등록<button class="modal-x" onclick="closeDlg()" aria-label="닫기">'+ic("x",16)+'</button></div>'+
-  '<div class="modal-body"><div style="font-size:13px"><b>'+esc(d.title)+'</b><div class="fn" style="margin-top:5px">'+esc(d.spName||"")+'</div></div>'+
-   '<div class="fld"><label>유형</label><select id="inc-kind"><option>권리자 클레임</option><option>오적재 (잘못된 폴더·중복)</option><option>내용 오류·품질 문제</option><option>개인정보 포함 발견</option><option>기타</option></select></div>'+
-   '<div class="fld"><label>내용 (필수)</label><textarea id="inc-desc" placeholder="예: 권리자로부터 게시 중단 요청 접수 (메일 첨부)"></textarea></div>'+
-   '<div class="setgrp-d">업로드분은 시스템이 지울 수 없으므로, 신고는 SharePoint·Viva 관리자 대상 수동 삭제 요청 절차로 이어집니다.</div>'+
-  '</div><div class="modal-f"><button class="btn" onclick="closeDlg()">취소</button><button class="btn primary" onclick="saveInc()">'+ic("check",13)+'등록</button></div></div>';
-}
-function saveInc(){
-  const desc=val("inc-desc");if(!desc){toastMsg("내용을 입력해주세요");return;}
-  const kind=val("inc-kind")||"기타";const docId=dialog.docId;closeDlg();
-  const inc=addIncident(kind,desc,docId,null);
-  toastMsg(inc?"사후 조치 대장에 등록했습니다":"동일 유형의 미결 인시던트가 이미 있습니다");
-  activeView="incidents";render();
-}
 
 /* L4 라이선스 문의 이메일 초안 — 실제 다운스트림 용도 + 잔존 조항까지 명시 요청 */
 function openMail(id){dialog={type:"mail",id};renderDialog();}
@@ -1575,8 +1508,6 @@ function notifItems(){
     const l=DB.licenses.find(x=>x.id===s.licenseId);
     if(l&&(l.revoked||licStatus(l).k==="expired"))items.push({sev:"risk",icon:"radio",t:"소스 수집 중지: "+s.name,d:s.licenseId+" 계약 종료 — 갱신 전 재가동 금지",act:"none"});
   });
-  const inc=DB.incidents.filter(i=>i.status!=="resolved").length;
-  if(inc)items.push({sev:"risk",icon:"alert-triangle",t:"사후 조치 미결 "+inc+"건",d:"회수 불가분 수동 조치가 진행 중입니다",act:"incidents"});
   return items.sort((a,b)=>(a.sev==="risk"?0:1)-(b.sev==="risk"?0:1));
 }
 function openNotif(){dialog={type:"notif"};renderDialog();}
@@ -1696,7 +1627,7 @@ function policyPreview(title,mut,apply,extraNote){
   mut();
   const moves={};let up=0;
   DB.docs.forEach(d=>{
-    if(!["review","held","blocked"].includes(d.state))return;
+    if(!["review","held"].includes(d.state))return;
     if(d.manual&&d.manual.route==="rejected")return;
     const to=evaluate(d).route;
     if(to!==d.state){const k=ROUTE_META[d.state].label+" → "+(to==="uploaded"?"자동 적재 경로":ROUTE_META[to].label);moves[k]=(moves[k]||0)+1;if(to==="uploaded")up++;}
@@ -1743,7 +1674,7 @@ function policyHTML(){
   const lvRow=(lv,ctl)=>'<div class="lvrow">'+lvBadge(lv)+'<div class="d"><b>'+esc(LV_META[lv].desc)+'</b><br>'+esc(LV_META[lv].act)+'</div>'+ctl+'</div>';
   const delayOpts=[[0,"즉시 (비권장)"],[60,"1분 (데모)"],[1800,"30분"],[7200,"2시간"],[86400,"24시간"]];
   return '<div class="setgrp"><div class="setgrp-t">'+ic("user",14)+' 우리 조직의 이용 목적</div>'+
-   '<div class="setgrp-d">L2 조건부 자료의 조건 대조와 라이선스 유효성 판정의 기준값입니다. <b>변경하면 미결 문서가 재평가됩니다</b> — 이미 업로드된 문서는 비가역이므로 재평가 대신 충돌 스캔으로 인시던트가 생성됩니다.<br>참고: 이 시스템에서 “적재”는 <b>SharePoint 업로드 = RAG·Viva 동시 업로드</b>를 의미하며 <b>분리가 불가능</b>합니다. 그래서 라이선스가 사내 열람·AI 인덱싱·교육 게시를 전부 커버해야만 적재됩니다 — 부분 커버 계약의 문서는 보류에 남습니다.</div>'+
+   '<div class="setgrp-d">L2 조건부 자료의 조건 대조와 라이선스 유효성 판정의 기준값입니다. <b>변경하면 미결 문서가 재평가됩니다</b> — 이미 업로드된 문서는 비가역이므로 재평가 대상이 아니며, 새 기준과의 충돌은 감사 로그·알림으로만 표면화됩니다.<br>참고: 이 시스템에서 “적재”는 <b>SharePoint 업로드 = RAG·Viva 동시 업로드</b>를 의미하며 <b>분리가 불가능</b>합니다. 그래서 라이선스가 사내 열람·AI 인덱싱·교육 게시를 전부 커버해야만 적재됩니다 — 부분 커버 계약의 문서는 보류에 남습니다.</div>'+
    '<div class="usebox">'+
     useRow("commercial","상업적 이용","자료를 상업적 산출물·대외 서비스에 활용")+
     useRow("redistribute","재배포","사내 시스템 밖으로 자료를 재배포")+
@@ -1768,7 +1699,7 @@ function policyHTML(){
    lvRow(2,'<select onchange="setLvAction(2,this.value)"><option value="conditional"'+(S.levelActions[2]==="conditional"?" selected":"")+'>용도 대조 후 적재</option><option value="review"'+(S.levelActions[2]==="review"?" selected":"")+'>검토로 강등 (보수)</option></select>')+
    lvRow(3,'<span class="fixed">'+ic("lock",12)+'고정 — 사람 검토</span>')+
    lvRow(4,'<span class="fixed">'+ic("lock",12)+'고정 — 차단 + 문의처 생성</span>')+
-   lvRow(5,'<span class="fixed">'+ic("lock",12)+'고정 — 수집 자체 차단</span>')+
+   lvRow(5,'<span class="fixed">'+ic("lock",12)+'고정 — 수집 차단·기록 후 폐기</span>')+
   '</div>';
 }
 function setDelay(v){DB.settings.uploadDelaySec=parseInt(v,10);
@@ -1782,7 +1713,7 @@ function toggleUsage(key){
     audit("—","정책 변경: "+label+" "+(cur?"OFF":"ON"),"관리자","이용 목적 변경");
     const n=reEvaluateAll("시스템(정책)","이용 목적 변경 재평가");
     toastMsg("재평가 완료 — 미결 "+n+"건 변경 · 업로드분은 충돌 스캔");render();renderModal();},
-   "이미 업로드된 문서는 <b>회수되지 않으며</b>, 새 기준과 충돌하면 인시던트로 등록되어 수동 조치 대상이 됩니다.");
+   "이미 업로드된 문서는 <b>회수되지 않으며</b>, 새 기준과 충돌분의 삭제는 SharePoint 관리자 수동 절차로만 가능합니다.");
 }
 function setFolderThreshold(v){v=parseInt(v,10);
   const cur=DB.settings.folderThreshold;
@@ -1837,7 +1768,7 @@ function licRulesHTML(){
    }).join("")+
    '<div class="rcard-btns" style="margin-top:6px"><button class="btn primary sm" onclick="saveLicRules()">'+ic("check",13)+'저장 — 미결 문서 재평가</button></div>'+
   '<div class="setgrp"><div class="setgrp-t">'+ic("scale",14)+' 이 키워드가 하는 일 / 하지 않는 일</div>'+
-   '<div class="setgrp-d">하는 일: 표기 문자열 인식(표준 표기 사전 확장) · 사람이 확정한 조직 고유 표기를 자산으로 축적.<br>하지 않는 일: 레벨 부여, 용도 판정, 이미 적재된 문서 변경 — 그건 각각 카탈로그·법무 확정·사후 조치의 몫입니다. 변경 이력은 감사 로그에 남습니다.</div></div>';
+   '<div class="setgrp-d">하는 일: 표기 문자열 인식(표준 표기 사전 확장) · 사람이 확정한 조직 고유 표기를 자산으로 축적.<br>하지 않는 일: 레벨 부여, 용도 판정, 이미 적재된 문서 변경 — 그건 각각 카탈로그·법무 확정·SharePoint 거버넌스의 몫입니다. 변경 이력은 감사 로그에 남습니다.</div></div>';
 }
 let licOpenLv={1:true}; /* 표기 규칙 탭 아코디언 — 기본은 L1만 펼침 */
 function toggleLvGroup(lv){
@@ -1971,6 +1902,11 @@ function startSync(){
       audit(d.title,"검증 → 적재 자격 확정","AI 엔진",ev.why);
       beginFetch(d,"AI 엔진",ev,"동기화 자동 경로");
       toastMsg("신규 1건 — 원본 확보 후 업로드 대기로 이동합니다");
+    }else if(ev.route==="blocked"){
+      /* L5 접근통제 — 레코드 미보존: 기록 후 폐기 */
+      DB.docs.splice(DB.docs.indexOf(d),1);
+      audit(d.title,"수집 차단 — 기록 후 폐기","시스템(수집 필터)",ev.why+" · 출처 "+d.source+" · 원문 미저장, 사람 검토 없이 종료");
+      toastMsg("접근통제 감지 — 수집 차단·기록 후 폐기");
     }else{
       d.appliedLic=ev.lic||null;d.evalWhy=ev.why;d.rules=ev.rules||[];d.state=ev.route;
       d.history.push({t:d.time,from:"검증",to:ROUTE_META[ev.route].label,by:"AI 엔진",note:ev.why});

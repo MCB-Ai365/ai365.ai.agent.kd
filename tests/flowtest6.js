@@ -26,7 +26,7 @@ ok(r2==="KR-NEWS|held","builtin alias matched: "+r2);
 E("closeSettings()");
 // 개발 어휘 부재 검증 — 렌더된 전체 화면 + 5개 설정 탭
 let all=w.document.getElementById('app').innerHTML;
-['queue','log','staging','archive','hold','ledger','incidents','audit'].forEach(v=>{E("setView('"+v+"')");all+=w.document.getElementById("view").innerHTML;});
+['queue','log','staging','archive','hold','ledger','audit'].forEach(v=>{E("setView('"+v+"')");all+=w.document.getElementById("view").innerHTML;});
 E("ledgerMode='cat';renderView()");all+=w.document.getElementById("view").innerHTML;
 ['policy','sources','lic','routing','conn'].forEach(t=>{E("openSettings()");E("switchMTab('"+t+"')");all+=w.document.getElementById("modalroot").innerHTML;});
 E("closeSettings()");

@@ -61,11 +61,10 @@ E("saveLic()");
 await sleep(1700);
 ok(E("DB.docs.find(d=>d.source.indexOf('Apex')>=0).state")==="staged","full-bundle license -> staged");
 ok(E("DB.docs.find(d=>d.source.indexOf('Apex')>=0).rules.indexOf('R10')")>=0,"R10 on licensed doc");
-// 해지(잔존 없음) → 인시던트, 기적재 불변
+// 해지(잔존 없음) → 기적재 불변 (사후 삭제는 SharePoint 거버넌스 영역)
 E("DB.licenses.find(l=>l.id==='LIC-001').survival=false");
 E("revokeLic('LIC-001')");
 E("var cb=_confirmCb;_confirmCb=null;closeDlg();cb()");
-ok(E("DB.incidents.some(i=>i.kind.indexOf('라이선스 소멸')>=0)"),"revoke incident");
 ok(E("DB.docs.filter(d=>d.appliedLic==='LIC-001'&&d.state==='uploaded').length")===1,"uploaded immutable");
 // 업로드 체크리스트 확정 + 파일명 코드
 const sid=E("DB.docs.find(d=>d.state==='staged').id");

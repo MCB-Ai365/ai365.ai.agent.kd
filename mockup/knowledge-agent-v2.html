@@ -754,6 +754,10 @@ function srcForDoc(d){
   const src=String(d.source||"");if(src.length<3)return null;
   return DB.settings.sources.find(s=>s.name&&s.name.length>=3&&(src.indexOf(s.name)>=0||s.name.indexOf(src)>=0))||null;
 }
+/* 출처 문자열 매칭 — 소스 연결이 없는 문서를 위한 폴백 경로.
+   빈 scope는 어떤 문서에도 매칭되지 않는다: ""는 모든 문자열의 부분 문자열이므로
+   그대로 indexOf를 쓰면 전 문서에 라이선스가 걸린다(범위 초과 사고). */
+function scopeMatches(l,d){return !!l.scope&&(d.source||"").indexOf(l.scope)>=0;}
 /* 소스에 명시적으로 연결된 계약 — 매번 조회하므로 나중에 연결해도 즉시 반영된다 */
 function licLinkedToDoc(d){
   const s=srcForDoc(d);if(!s||!s.licenseId)return null;
@@ -764,10 +768,7 @@ function licLinkedToDoc(d){
 function validLicenseFor(d){
   const linked=licLinkedToDoc(d);
   if(linked&&licCoversBundle(linked))return linked;
-  return DB.licenses.find(l=>{
-    if((d.source||"").indexOf(l.scope)<0)return false;
-    return licCoversBundle(l);
-  });
+  return DB.licenses.find(l=>scopeMatches(l,d)&&licCoversBundle(l));
 }
 /* evaluate — '업로드 자격'을 판정. uploaded 자격이어도 실제 업로드는
    원본 확보 → 유예 대기를 거쳐야만 실행된다. */
@@ -804,7 +805,7 @@ function evaluate(d){
   if(d.lv===3){R.push("R08");return{route:"review",rules:R,why:"L3 라이선스 불명 — 표기 부재는 자유 이용이 아니라 보호가 기본값"+tag(R)};}
   const linked=licLinkedToDoc(d);
   const near=(linked&&licStatus(linked).k!=="expired")?linked
-    :DB.licenses.find(l=>!l.revoked&&licStatus(l).k!=="expired"&&(d.source||"").indexOf(l.scope)>=0);
+    :DB.licenses.find(l=>!l.revoked&&licStatus(l).k!=="expired"&&scopeMatches(l,d));
   if(near){R.push("R11");return{route:"held",rules:R,why:"L4 — "+near.id+" 계약은 있으나 용도 불충족("+(bundleGapOf(near)||"계약 기간 경과")+"). 적재는 RAG·Viva 동시 전파라 부분 적재가 불가능 — 용도 추가 협상 필요"+tag(R)};}
   R.push("R09");return{route:"held",rules:R,why:"L4 명시적 제한 — 유효한 라이선스 없음, 권리 확보 대기"+tag(R)};
 }
@@ -1079,7 +1080,7 @@ function renderView(){
 function queuePrio(d){
   const linked=licLinkedToDoc(d);
   const near=(linked&&licStatus(linked).k==="expiring")?linked
-    :DB.licenses.find(l=>!l.revoked&&licStatus(l).k==="expiring"&&(d.source||"").indexOf(l.scope)>=0);
+    :DB.licenses.find(l=>!l.revoked&&licStatus(l).k==="expiring"&&scopeMatches(l,d));
   if(near)return{p:0,chip:'<span class="sig risk" title="연관 계약의 만료가 임박 — 권리 협상 판단이 급한 건">'+ic("calendar",10)+'계약 '+esc(licStatus(near).label)+' 연관</span>'};
   if(d.conf<DB.settings.confidenceThreshold)return{p:1,chip:'<span class="sig warn" title="AI 신뢰도가 임계값 미만 — 사람 판단 우선 대상">'+ic("alert-triangle",10)+'저신뢰 '+d.conf+'%</span>'};
   return{p:2,chip:'<span class="sig" title="같은 우선순위 안에서는 오래 기다린 순서">'+ic("clock",10)+esc(d.time)+' 수집</span>'};
@@ -1242,7 +1243,13 @@ function ledgerHTML(){
     const docs=DB.docs.filter(d=>d.appliedLic===l.id&&(d.state==="uploaded"||d.state==="staged"||d.state==="fetching"));
     return '<div class="lic-card"><div class="lic-h"><div><div class="lic-id">'+esc(l.id)+'</div><div class="lic-name">'+esc(l.name)+'</div></div>'+
      '<span class="dday '+(st.k==="active"?"okd":st.k==="expiring"?"warnd":"exp")+'">'+esc(st.label)+'</span></div>'+
-     '<div class="lic-row"><b>범위</b><span>출처 “'+esc(l.scope)+'” 매칭 문서 전체</span></div>'+
+     '<div class="lic-row"><b>범위</b><span>'+(function(){
+       const srcs=DB.settings.sources.filter(s=>s.licenseId===l.id).map(s=>s.name);
+       const parts=[];
+       if(srcs.length)parts.push("연결된 수집 소스 "+srcs.length+"곳 — "+esc(srcs.join(", ")));
+       if(l.scope)parts.push("출처 “"+esc(l.scope)+"” 매칭 문서");
+       return parts.length?parts.join(" · "):'<span style="color:var(--warn)">적용 대상 없음 — 소스 연결도 범위 문자열도 없습니다</span>';
+     })()+'</span></div>'+
      '<div class="lic-row"><b>허용 용도</b><span class="chipline">'+["internal","ai","education","redistribute","commercial"].filter(k=>l.uses[k]).map(k=>'<span class="sig">'+({internal:"사내 열람",ai:"AI 인덱싱(RAG)",education:"교육 게시(Viva)",redistribute:"재배포",commercial:"상업적 이용"})[k]+'</span>').join("")+((l.uses.ai===false||!l.uses.education)?'<span class="dist off" title="적재는 SharePoint·RAG·Viva 동시 업로드(분리 불가)라서, 세 용도를 전부 커버하지 못하는 라이선스로는 적재할 수 없습니다">번들 미충족 — 적재 불가</span>':'')+'</span></div>'+
      '<div class="lic-row"><b>기간</b><span>'+esc(l.start)+' ~ '+esc(l.end)+'</span></div>'+
      '<div class="lic-row"><b>잔존 조항</b><span>'+(l.survival?'<span class="sig ok">'+ic("check",10)+'포함 — 계약 종료 후 기적재분 유지 가능</span>':'<span class="dist off">'+ic("alert-triangle",10)+'없음 — 만료 시 기적재분이 위반 리스크로 영구화</span>')+'</span></div>'+
@@ -1618,19 +1625,39 @@ function applyManualUp(){
 
 /* 라이선스 등록 폼 — 저장 즉시 보류함 재평가, 잔존 조항 포함 */
 let _licPreSrc=null; /* 보류 문서에서 열었을 때 자동 체크할 소스 (사람이 해제 가능) */
+/* 문서 출처를 범위 문자열로 옮길 때 “(유료)”·“(구독 저널)” 같은 괄호 꼬리를 뗀다 —
+   꼬리를 남기면 같은 출판사인데 표기가 조금 다른 자료가 매칭에서 빠진다. */
+function scopeHintFrom(src){return String(src||"").replace(/\s*[（(\[][^）)\]]*[）)\]]\s*$/,"").trim();}
 function openLicForm(prefillScope){
   _licPreSrc=prefillScope?srcForDoc({source:prefillScope}):null;
-  dialog={type:"lic",scope:prefillScope||""};renderDialog();
+  dialog={type:"lic",scope:scopeHintFrom(prefillScope)};renderDialog();scopeMatchNote();
+}
+/* 저장 전에 범위 초과를 잡는다 — 지금 이 문자열이 실제로 몇 건에 걸리는지 즉시 보여준다.
+   범위는 조건부 필수: 소스를 하나라도 고르면 비워도 되고, 아무것도 안 고르면 필수. */
+function scopeMatchNote(){
+  const el=document.getElementById("lf-scope"),out=document.getElementById("lf-scope-hit"),lab=document.getElementById("lf-scope-lab");
+  if(!el||!out)return;
+  const sc=el.value.trim(),anySrc=DB.settings.sources.some((s,i)=>chk("lf-src-"+i));
+  if(lab)lab.textContent=anySrc?"범위 — 출처 매칭 문자열 (선택 · 소스를 골랐으므로 비워도 됩니다)":"범위 — 출처 매칭 문자열 (필수 · 소스를 고르면 선택이 됩니다)";
+  const say=(c,t)=>{out.innerHTML='<span style="color:var('+c+')">'+t+'</span>';};
+  if(!sc)return say(anySrc?"--ok":"--warn",anySrc
+    ?ic("check",11)+" 선택한 소스에만 적용됩니다 — 출처 문자열 매칭은 쓰지 않습니다."
+    :ic("alert-triangle",11)+" 소스를 하나도 고르지 않았습니다 — 비워두면 어떤 문서에도 적용되지 않습니다.");
+  const hit=DB.docs.filter(d=>(d.source||"").indexOf(sc)>=0),srcs=[...new Set(hit.map(d=>d.source))];
+  if(!hit.length)return say("--warn",ic("alert-triangle",11)+" 지금 이 문자열에 맞는 문서가 없습니다 — 오타이거나 아직 수집되지 않은 출처입니다.");
+  if(srcs.length>1)return say("--risk",ic("alert-triangle",11)+" 현재 문서 <b>"+hit.length+"건 · 출처 "+srcs.length+"종</b>에 걸립니다 — 범위 초과가 아닌지 확인하세요: "+esc(srcs.join(", ")));
+  say("--ok",ic("check",11)+" 현재 문서 <b>"+hit.length+"건</b>에 적용됩니다 — 출처 “"+esc(srcs[0])+"”");
 }
 function licDlg(){
   return '<div class="modal sm" role="dialog" aria-modal="true"><div class="modal-h">'+ic("book-key",16)+'라이선스 등록<button class="modal-x" onclick="closeDlg()" aria-label="닫기">'+ic("x",16)+'</button></div>'+
   '<div class="modal-body">'+
    '<div class="fld"><label>라이선스 이름 (필수)</label><input id="lf-name" placeholder="예: RefSci Review 사내 교육 라이선스" /></div>'+
-   '<div class="fld"><label>범위 — 출처 매칭 문자열 (필수)</label><input id="lf-scope" value="'+esc(dialog.scope)+'" placeholder="예: Refrigeration Science Review" />'+
-    '<div class="setgrp-d">이 문자열이 포함된 출처의 문서가 라이선스 대상이 됩니다. 매칭이 애매하면 재평가 결과를 반드시 확인하세요(범위 초과 방지).</div></div>'+
+   '<div class="fld"><label id="lf-scope-lab">범위 — 출처 매칭 문자열</label><input id="lf-scope" oninput="scopeMatchNote()" value="'+esc(dialog.scope)+'" placeholder="예: Refrigeration Science Review" />'+
+    '<div class="setgrp-d">소스에 연결하지 않고 들어온 문서(원본 직접 업로드·소급분·미등록 출처)를 잡는 폴백 경로입니다. 이 문자열이 <b>포함된</b> 출처의 문서가 대상이 되므로, 짧게 적으면 무관한 자료까지 걸립니다.</div>'+
+    '<div class="setgrp-d" id="lf-scope-hit"></div></div>'+
    '<div class="fld"><label>적용할 수집 소스 (선택 · 복수 가능)</label><div class="chipline">'+
     (DB.settings.sources.length?DB.settings.sources.map((s,i)=>
-      '<label class="sig"><input type="checkbox" id="lf-src-'+i+'"'+(s===_licPreSrc?" checked":"")+' /> '+esc(s.name)+(s.licenseId?esc(" (현재 "+s.licenseId+")"):"")+'</label>').join("")
+      '<label class="sig"><input type="checkbox" id="lf-src-'+i+'" onchange="scopeMatchNote()"'+(s===_licPreSrc?" checked":"")+' /> '+esc(s.name)+(s.licenseId?esc(" (현재 "+s.licenseId+")"):"")+'</label>').join("")
      :'<span style="color:var(--t3);font-size:12px">등록된 수집 소스가 없습니다</span>')+'</div>'+
     '<div class="setgrp-d">선택한 소스의 자료는 <b>출처 문자열과 무관하게</b> 이 계약으로 적재 자격을 판정합니다. 계약이 만료·해지되면 선택한 소스의 <b>수집이 자동 중지</b>됩니다. 이미 다른 계약에 연결된 소스를 고르면 그 연결을 대체합니다.</div></div>'+
    '<div class="frow"><div class="fld"><label>시작일</label><input id="lf-start" type="date" value="'+addDays(0)+'" /></div>'+
@@ -1653,7 +1680,11 @@ function licDlg(){
 }
 function saveLic(){
   const name=val("lf-name"),scope=val("lf-scope");
-  if(!name||!scope){toastMsg("이름과 범위를 입력해주세요");return;}
+  const anySrc=DB.settings.sources.some((s,i)=>chk("lf-src-"+i));
+  if(!name){toastMsg("라이선스 이름을 입력해주세요");return;}
+  /* 범위는 조건부 필수 — 소스 연결이 있으면 그게 더 정확한 근거이므로 강요하지 않는다.
+     둘 다 없으면 이 계약은 어떤 문서에도 걸리지 않는 죽은 레코드가 된다. */
+  if(!scope&&!anySrc){toastMsg("적용할 수집 소스를 고르거나, 출처 매칭 문자열을 입력해주세요");return;}
   const l={id:"LIC-"+String(DB.licenses.length+1).padStart(3,"0"),name,scope,
    uses:{internal:true,ai:chk("lf-u-ai"),education:chk("lf-u-edu"),redistribute:chk("lf-u-red"),commercial:chk("lf-u-com")},
    survival:chk("lf-sv"),
@@ -1661,7 +1692,7 @@ function saveLic(){
   DB.licenses.push(l);
   const linked=[];
   DB.settings.sources.forEach((s,i)=>{if(chk("lf-src-"+i)){s.licenseId=l.id;linked.push(s.name);}});
-  audit("—","라이선스 등록: "+l.id+" · "+l.name,"관리자","범위 “"+scope+"” · "+l.start+"~"+l.end+(l.survival?" · 잔존 조항 포함":" · 잔존 조항 없음")+(linked.length?" · 소스 연결: "+linked.join(", "):""));
+  audit("—","라이선스 등록: "+l.id+" · "+l.name,"관리자",(scope?"범위 “"+scope+"”":"범위 미지정 — 연결된 소스에만 적용")+" · "+l.start+"~"+l.end+(l.survival?" · 잔존 조항 포함":" · 잔존 조항 없음")+(linked.length?" · 소스 연결: "+linked.join(", "):""));
   const n=reEvaluateAll("시스템(권리 원장)",l.id+" 등록에 따른 재평가");
   closeDlg();
   toastMsg((l.uses.ai&&l.uses.education)?("등록 완료 — "+n+"건이 원본 확보 → 업로드 대기로 이동합니다"):"등록됨 — 단, AI·교육 용도 미포함이라 이 라이선스로는 적재가 불가합니다(문서는 보류 유지)");

@@ -98,6 +98,36 @@ w.document.getElementById("lf-src-0").checked=true;
 E("saveLic()");
 ok(E("DB.settings.sources[0].licenseId")===E("DB.licenses[DB.licenses.length-1].id"),"lic form links checked source");
 
+// ── 범위(scope)는 조건부 필수 · 빈 범위는 아무것도 매칭하지 않는다 ──
+E('DB.licenses.push({id:"LIC-EMPTY",name:"범위 없는 계약",scope:"",uses:{internal:true,ai:true,education:true,redistribute:true,commercial:true},survival:true,start:addDays(-1),end:addDays(300),obligations:"—",contact:"—",file:"—",revoked:false})');
+ok(E('DB.docs.filter(d=>scopeMatches(DB.licenses.find(l=>l.id==="LIC-EMPTY"),d)).length')===0,"empty scope matches no document");
+const rE=E(`(function(){const ev=evaluate({source:"아무 출처 XYZ",lic:"",lv:4,conf:90});return ev.route+"|"+(ev.lic||"-");})()`);
+ok(rE==="held|-","empty-scope license grants no R10: "+rE);
+// 보류에서 열 때 괄호 꼬리를 떼고 채운다
+ok(E('scopeHintFrom("Apex Market Intelligence (유료)")')==="Apex Market Intelligence","scope hint strips paren tail");
+ok(E('scopeHintFrom("Journal of HVAC&R (구독 저널)")')==="Journal of HVAC&R","scope hint strips full-width tail");
+// 소스만 골라도 저장된다 (범위 비움)
+E("openLicForm()");
+w.document.getElementById("lf-name").value="소스만 연결한 계약";
+w.document.getElementById("lf-scope").value="";
+w.document.getElementById("lf-src-1").checked=true;
+const nBefore=E("DB.licenses.length");E("saveLic()");
+ok(E("DB.licenses.length")===nBefore+1,"saves with source only (scope blank)");
+ok(E("DB.settings.sources[1].licenseId")===E("DB.licenses[DB.licenses.length-1].id"),"source-only license linked");
+// 범위도 소스도 없으면 거부
+E("openLicForm()");
+w.document.getElementById("lf-name").value="근거 없는 계약";
+const nBefore2=E("DB.licenses.length");E("saveLic()");
+ok(E("DB.licenses.length")===nBefore2,"rejects when neither scope nor source");
+E("closeDlg()");
+// 실시간 매칭 미리보기 + 라벨의 조건부 필수 표기
+E("openLicForm('Apex Market Intelligence (유료)')");
+ok(w.document.getElementById("lf-scope").value==="Apex Market Intelligence","prefill strips tail");
+const hitNote=w.document.getElementById("lf-scope-hit").textContent;
+ok(hitNote.indexOf("현재 문서")>=0,"live match count shown: "+hitNote.slice(0,30));
+ok(w.document.getElementById("lf-scope-lab").textContent.indexOf("선택")>=0,"label turns optional when a source is checked");
+E("closeDlg()");
+
 console.log(`\nRESULT: ${pass} passed, ${fail} failed`);
 process.exit(fail?1:0);
 })().catch(e=>{console.error("ERROR:",e.stack);process.exit(1)});

@@ -71,6 +71,33 @@ const sid=E("DB.docs.find(d=>d.state==='staged').id");
 E(`openUploadConfirm('${sid}')`);E("dialog.ack=true");E("confirmUpload()");
 ok(E(`DB.docs.find(d=>d.id==='${sid}').state`)==="uploaded","checklist upload");
 ok(E(`DB.docs.find(d=>d.id==='${sid}').spName`).indexOf("[AI365-")>=0,"filename pointer");
+
+// ── 소스 계약 연결: 칩은 원장 근거로만, 판정은 명시 연결을 우선 ──
+const sh=E("sourcesHTML()");
+ok(sh.indexOf(">계약됨<")<0,"no self-declared 계약됨 chip");
+ok(sh.indexOf("계약 없음 — 문서별 판정")>=0&&sh.indexOf("자동 적재")>=0,"chip states from ledger");
+// 출처 문자열이 계약 범위와 안 맞아도 소스에 연결했으면 R10
+const good=E("DB.licenses.filter(l=>!l.revoked&&licCoversBundle(l)).map(l=>l.id)[0]");
+E(`DB.settings.sources.push({name:"사내 저널 미러 피드",url:"https://mirror.example",kind:"REST API",auth:"",licenseId:"${good}",schedule:"1일 1회",on:true})`);
+const rL=E(`(function(){const ev=evaluate({source:"사내 저널 미러 피드",lic:"© All Rights Reserved",lv:4,conf:93});return ev.route+"|"+(ev.lic||"")+"|"+(ev.rules||[]).join(",");})()`);
+ok(rL.indexOf("uploaded|"+good)===0&&rL.indexOf("R10")>=0,"explicit source link grants R10: "+rL);
+// 연결했어도 3용도 미충족 계약이면 자동 적재 안 됨
+E('DB.settings.sources.push({name:"용도미달 테스트 피드",url:"https://gap.example",kind:"RSS",auth:"",licenseId:"LIC-002",schedule:"1일 1회",on:true})');
+const rG=E(`(function(){const ev=evaluate({source:"용도미달 테스트 피드",lic:"유료 구독",lv:4,conf:91});return ev.route+"|"+ev.why;})()`);
+ok(rG.indexOf("held|")===0&&rG.indexOf("교육 게시 미포함")>=0,"linked-but-unmet bundle stays held: "+rG);
+// L5: 인증 키가 있는 소스의 정상 응답은 우회가 아니므로 폐기하지 않음
+E('DB.settings.sources.push({name:"인증 테스트 피드",url:"https://auth.example",kind:"REST API",auth:"••••9999",licenseId:null,schedule:"1일 1회",on:true})');
+const rA=E(`(function(){const d={title:"인증 소스 L5",source:"인증 테스트 피드",lic:"로그인 필요",lv:5,conf:98};const ev=evaluate(d);return ev.route+"|"+d.lv+"|"+(d.l5Waived||"");})()`);
+ok(rA.indexOf("blocked")<0&&rA.indexOf("|4|인증 테스트 피드")>=0,"L5 waived on authenticated source: "+rA);
+ok(E(`evaluate({title:"미등록 포털",source:"경쟁사 파트너 포털",lic:"로그인 필요",lv:5,conf:98}).route`)==="blocked","unauthenticated L5 still discarded");
+// 라이선스 폼에서 소스를 체크하면 그 소스의 계약 연결이 갱신됨
+E("openLicForm()");
+w.document.getElementById("lf-name").value="소스 연결 테스트";
+w.document.getElementById("lf-scope").value="연결테스트범위";
+w.document.getElementById("lf-src-0").checked=true;
+E("saveLic()");
+ok(E("DB.settings.sources[0].licenseId")===E("DB.licenses[DB.licenses.length-1].id"),"lic form links checked source");
+
 console.log(`\nRESULT: ${pass} passed, ${fail} failed`);
 process.exit(fail?1:0);
 })().catch(e=>{console.error("ERROR:",e.stack);process.exit(1)});

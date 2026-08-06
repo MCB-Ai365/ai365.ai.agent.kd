@@ -532,12 +532,15 @@ const DB={
   usage:{commercial:false,redistribute:false,external:false}, /* 테넌트의 이용 목적 — L2 조건 대조 기준 */
   confidenceThreshold:70,
   levelActions:{1:"auto",2:"conditional"}, /* 'review'로 강등 가능(보수 모드) */
-  sources:[ /* 소스는 콘텐츠 유형을 선언하지 않는다 — 유형·분류는 수집 후 문서마다 AI가 판정 */
-   {name:"국가법령정보 OPEN API",url:"https://open.law.go.kr/openApi",kind:"OpenAPI",auth:"••••3A9F",licensed:true,schedule:"1일 1회",on:true},
-   {name:"국가기술표준원 KS",url:"https://standard.go.kr/api",kind:"OpenAPI",auth:"••••8B12",licensed:true,schedule:"1일 1회",on:true},
-   {name:"CrossRef 학술 메타",url:"https://api.crossref.org/works",kind:"REST API",auth:"",licensed:true,schedule:"6시간",on:true},
-   {name:"산업뉴스 와이어(계약)",url:"https://newswire.example/api/v2",kind:"REST API",auth:"••••7C21",licensed:true,schedule:"30분",on:true},
-   {name:"제조사 보도자료 RSS",url:"https://vendor.example/press/rss",kind:"RSS",auth:"",licensed:false,schedule:"1시간",on:false}],
+  /* 소스는 콘텐츠 유형을 선언하지 않는다 — 유형·분류는 수집 후 문서마다 AI가 판정.
+     계약 여부의 유일한 근거는 licenseId → 권리 원장 조회다(자기신고 불린을 두지 않는다). */
+  sources:[
+   {name:"국가법령정보 OPEN API",url:"https://open.law.go.kr/openApi",kind:"OpenAPI",auth:"••••3A9F",licenseId:null,schedule:"1일 1회",on:true},
+   {name:"국가기술표준원 KS",url:"https://standard.go.kr/api",kind:"OpenAPI",auth:"••••8B12",licenseId:null,schedule:"1일 1회",on:true},
+   {name:"CrossRef 학술 메타",url:"https://api.crossref.org/works",kind:"REST API",auth:"",licenseId:null,schedule:"6시간",on:true},
+   {name:"Journal of HVAC&R",url:"https://jhvacr.example/api/v1",kind:"REST API",auth:"••••5D44",licenseId:"LIC-001",schedule:"1일 1회",on:true},
+   {name:"Apex Market Intelligence",url:"https://apex-mi.example/api/v2",kind:"REST API",auth:"••••7C21",licenseId:"LIC-002",schedule:"30분",on:true},
+   {name:"제조사 보도자료 RSS",url:"https://vendor.example/press/rss",kind:"RSS",auth:"",licenseId:null,schedule:"1시간",on:false}],
   classifyRules:[
    {kw:"공조, HVAC, 환기, 실내공기, 팬코일",cat:"HVAC·공조"},
    {kw:"보일러, 난방, 히트펌프, 온수, 콘덴싱",cat:"난방·보일러"},
@@ -732,14 +735,38 @@ function licStatus(l){
 }
 /* 적재 = SharePoint+RAG+Viva '동시' 업로드(분리 불가)이므로,
    라이선스는 사내 열람·AI 인덱싱·교육 게시를 전부 커버해야만 업로드를 허용한다. */
+function licCoversBundle(l){
+  const s=licStatus(l).k; if(s!=="active"&&s!=="expiring")return false;
+  return !bundleGapOf(l);
+}
+/* 적재 자격에서 빠진 용도를 사람이 읽는 문구로 — 소스 칩·판정 사유가 함께 쓴다 */
+function bundleGapOf(l){
+  const g=[];
+  if(l.uses.ai===false)g.push("AI 인덱싱 미포함");
+  if(!l.uses.education)g.push("교육 게시 미포함");
+  if(DB.settings.usage.commercial&&!l.uses.commercial)g.push("상업적 이용 미포함");
+  if(DB.settings.usage.redistribute&&!l.uses.redistribute)g.push("재배포 미포함");
+  return g.length?g.join("·"):null;
+}
+/* 문서 출처 ↔ 등록된 수집 소스 매칭. 짧은 문자열의 우연한 부분 일치를 막기 위해 3자 이상만 본다.
+   [BACKEND] 실제 구현에서는 수집기가 소스 ID를 문서에 직접 심으므로 이 추정이 필요 없다. */
+function srcForDoc(d){
+  const src=String(d.source||"");if(src.length<3)return null;
+  return DB.settings.sources.find(s=>s.name&&s.name.length>=3&&(src.indexOf(s.name)>=0||s.name.indexOf(src)>=0))||null;
+}
+/* 소스에 명시적으로 연결된 계약 — 매번 조회하므로 나중에 연결해도 즉시 반영된다 */
+function licLinkedToDoc(d){
+  const s=srcForDoc(d);if(!s||!s.licenseId)return null;
+  return DB.licenses.find(l=>l.id===s.licenseId&&!l.revoked)||null;
+}
+/* 관리자가 소스에 걸어둔 계약을 먼저 보고, 없으면 출처 문자열 ↔ 계약 범위 매칭으로 넘어간다.
+   어느 경로든 번들 검사를 통과해야 한다 — 연결했다고 무조건 적재되는 것이 아니다. */
 function validLicenseFor(d){
+  const linked=licLinkedToDoc(d);
+  if(linked&&licCoversBundle(linked))return linked;
   return DB.licenses.find(l=>{
-    const s=licStatus(l).k; if(s!=="active"&&s!=="expiring")return false;
     if((d.source||"").indexOf(l.scope)<0)return false;
-    if(l.uses.ai===false||!l.uses.education)return false; /* 번들 미충족 → 이 라이선스로는 적재 불가 */
-    if(DB.settings.usage.commercial&&!l.uses.commercial)return false;
-    if(DB.settings.usage.redistribute&&!l.uses.redistribute)return false;
-    return true;
+    return licCoversBundle(l);
   });
 }
 /* evaluate — '업로드 자격'을 판정. uploaded 자격이어도 실제 업로드는
@@ -749,9 +776,18 @@ function validLicenseFor(d){
 function evaluate(d){
   const R=[],entry=catEntry(d);if(entry)R.push("R02");
   const tag=r=>" ["+r.join("·")+"]";
-  if(d.lv===5)return{route:"blocked",rules:["R01"],why:"L5 — 접근통제 우회가 필요해 수집 차단 · 기록 후 폐기"+tag(["R01"])};
+  /* L5는 '접근통제 우회'가 정의다. 인증 키가 등록된 소스의 정상 응답은 우회가 아니므로
+     폐기하지 않고 한 단계 낮춰(L4) 일반 판정을 받게 한다 — 적재 자격은 여전히 계약이 결정한다. */
+  if(d.lv===5){
+    const s=srcForDoc(d);
+    if(!(s&&s.auth))return{route:"blocked",rules:["R01"],why:"L5 — 접근통제 우회가 필요해 수집 차단 · 기록 후 폐기"+tag(["R01"])};
+    if(!d.l5Waived){
+      d.l5Waived=s.name;d.lv=4;
+      audit(d.title,"L5 해제 — 인증된 소스","시스템(수집 필터)","인증된 소스("+s.name+")의 정상 응답이므로 접근통제 우회가 아님 · L4(명시 제한)로 낮춰 일반 판정 진행");
+    }
+  }
   const lic=validLicenseFor(d);
-  if(lic){R.push("R10");return{route:"uploaded",lic:lic.id,rules:R,why:"기본 "+LV_META[d.lv].short+" ⊕ "+lic.id+" 적용 → 이용 가능"+tag(R)};}
+  if(lic){R.push("R10");return{route:"uploaded",lic:lic.id,rules:R,why:"기본 "+LV_META[d.lv].short+" ⊕ "+lic.id+" 적용"+(licLinkedToDoc(d)===lic?"(소스 계약 연결)":"")+" → 이용 가능"+tag(R)};}
   if(entry&&!entry.legalRef&&(entry.uses.ai==="r"||entry.uses.edu==="r")){R.push("R13");
     return{route:"review",rules:R,why:"카탈로그 "+entry.id+" 표기 인식 — "+(entry.uses.ai==="r"?"AI 인덱싱":"")+(entry.uses.ai==="r"&&entry.uses.edu==="r"?"·":"")+(entry.uses.edu==="r"?"Viva 교육":"")+" 용도가 법무 확정 대기(legal_review)라 자동 적재 금지"+tag(R)};}
   if(d.conf<DB.settings.confidenceThreshold){R.push("R12");
@@ -766,8 +802,10 @@ function evaluate(d){
     if(c.includes("no-redist")&&DB.settings.usage.redistribute){R.push("R07");return{route:"held",rules:R,why:"L2 조건 불일치 — 재배포 금지 자료인데 재배포 이용이 설정됨"+tag(R)};}
     R.push("R06");return{route:"uploaded",rules:R,why:"L2 조건("+c.join(", ")+")이 현재 이용 목적과 부합 — 조건부 적재 경로"+tag(R)};}
   if(d.lv===3){R.push("R08");return{route:"review",rules:R,why:"L3 라이선스 불명 — 표기 부재는 자유 이용이 아니라 보호가 기본값"+tag(R)};}
-  const near=DB.licenses.find(l=>!l.revoked&&licStatus(l).k!=="expired"&&(d.source||"").indexOf(l.scope)>=0);
-  if(near){R.push("R11");return{route:"held",rules:R,why:"L4 — "+near.id+" 계약은 있으나 용도 불충족("+(near.uses.ai===false?"AI 인덱싱 미포함":"교육 게시 미포함")+"). 적재는 RAG·Viva 동시 전파라 부분 적재가 불가능 — 용도 추가 협상 필요"+tag(R)};}
+  const linked=licLinkedToDoc(d);
+  const near=(linked&&licStatus(linked).k!=="expired")?linked
+    :DB.licenses.find(l=>!l.revoked&&licStatus(l).k!=="expired"&&(d.source||"").indexOf(l.scope)>=0);
+  if(near){R.push("R11");return{route:"held",rules:R,why:"L4 — "+near.id+" 계약은 있으나 용도 불충족("+(bundleGapOf(near)||"계약 기간 경과")+"). 적재는 RAG·Viva 동시 전파라 부분 적재가 불가능 — 용도 추가 협상 필요"+tag(R)};}
   R.push("R09");return{route:"held",rules:R,why:"L4 명시적 제한 — 유효한 라이선스 없음, 권리 확보 대기"+tag(R)};
 }
 function audit(docTitle,fromTo,by,note){
@@ -1039,7 +1077,9 @@ function renderView(){
 
 /* ── 검토 대기: 우선순위 정렬 + 진행감 + 묶음 승인 ── */
 function queuePrio(d){
-  const near=DB.licenses.find(l=>!l.revoked&&licStatus(l).k==="expiring"&&(d.source||"").indexOf(l.scope)>=0);
+  const linked=licLinkedToDoc(d);
+  const near=(linked&&licStatus(linked).k==="expiring")?linked
+    :DB.licenses.find(l=>!l.revoked&&licStatus(l).k==="expiring"&&(d.source||"").indexOf(l.scope)>=0);
   if(near)return{p:0,chip:'<span class="sig risk" title="연관 계약의 만료가 임박 — 권리 협상 판단이 급한 건">'+ic("calendar",10)+'계약 '+esc(licStatus(near).label)+' 연관</span>'};
   if(d.conf<DB.settings.confidenceThreshold)return{p:1,chip:'<span class="sig warn" title="AI 신뢰도가 임계값 미만 — 사람 판단 우선 대상">'+ic("alert-triangle",10)+'저신뢰 '+d.conf+'%</span>'};
   return{p:2,chip:'<span class="sig" title="같은 우선순위 안에서는 오래 기다린 순서">'+ic("clock",10)+esc(d.time)+' 수집</span>'};
@@ -1455,33 +1495,41 @@ function srcDlg(){
     '<div class="setgrp-d">이 주소에서 수집이 시작됩니다. robots.txt·약관의 수집 금지 신호는 주소 단위로 함께 점검됩니다.</div></div>'+
    '<div class="frow"><div class="fld"><label>연동 방식</label><select id="sf-kind"><option>RSS</option><option>OpenAPI</option><option>REST API</option><option>웹 페이지</option></select></div>'+
     '<div class="fld"><label>수집 주기</label><select id="sf-sched"><option>30분</option><option>1시간</option><option>6시간</option><option selected>1일 1회</option></select></div></div>'+
-   '<div class="fld"><label>인증 키 (선택)</label><input id="sf-auth" type="password" placeholder="API 키 — 발급받은 경우만" /></div>'+
+   '<div class="fld"><label>인증 키 (선택)</label><input id="sf-auth" type="password" placeholder="API 키 — 발급받은 경우만" />'+
+    '<div class="setgrp-d">키는 자료를 <b>가져오기 위한 접근 수단</b>입니다 — 적재 권리와는 별개이며 적재 자격 판정에 반영되지 않습니다. 다만 인증된 소스의 정상 응답은 접근통제 <b>우회가 아니므로</b> L5 차단 대상에서 제외됩니다.</div></div>'+
    '<div class="fld"><label>소급 수집 범위</label><select id="sf-back"><option value="none" selected>신규분만 — 등록 이후 발행분</option><option value="3m">최근 3개월 소급</option><option value="12m">최근 12개월 소급</option><option value="all">전체 아카이브</option></select>'+
     '<div class="setgrp-d">업로드는 비가역이라 소급분에는 안전장치가 붙습니다 — 1회 200건 상한으로 나눠 수집되고, 자동 적재 자격이어도 <b>검토 대기</b>로 들어옵니다(보수 모드).</div></div>'+
-   '<div class="fld"><label>계약 연결 — 권리 원장</label><select id="sf-licref"><option value="">계약 없음 — 문서별 판정을 따름</option>'+DB.licenses.filter(l=>!l.revoked).map(l=>'<option value="'+esc(l.id)+'">'+esc(l.id)+' · '+esc(l.name)+' ('+esc(licStatus(l).label)+')</option>').join("")+'</select>'+
-    '<div class="setgrp-d">계약 소스는 원장 라이선스에 연결하세요 — 계약이 <b>만료·해지되면 이 소스의 수집이 자동 중지</b>됩니다. 계약 없이도 등록은 가능하며, 자료는 문서별 저작권 판정을 그대로 따릅니다.</div></div>'+
+   '<div class="fld"><label>계약 연결 — 권리 원장</label><select id="sf-licref"><option value="">계약 없음 — 문서별 판정을 따름</option>'+
+    DB.licenses.filter(l=>!l.revoked).map(l=>{const g=bundleGapOf(l);
+     return '<option value="'+esc(l.id)+'">'+esc(l.id)+' · '+esc(l.name)+' ('+esc(licStatus(l).label)+(g?" · "+g:" · 적재 3용도 커버")+')</option>';}).join("")+'</select>'+
+    '<div class="setgrp-d">연결한 계약이 <b>사내 열람·AI 인덱싱·교육 게시를 모두 커버</b>하면 이 소스의 자료는 별도 승인 없이 적재됩니다. 하나라도 빠지면 등록은 되지만 자료는 문서별 판정을 그대로 따릅니다. 계약이 <b>만료·해지되면 이 소스의 수집이 자동 중지</b>됩니다.</div></div>'+
    '<div class="setgrp-d">자료 유형은 따로 지정하지 않습니다 — 소스는 일단 넓게 수집하고, 문서마다 분류·저작권 판정이 개별로 붙습니다.</div>'+
    '<div class="userow"><div class="ut"><b>바로 가동</b><span>끄면 등록만 하고 수집은 시작하지 않습니다</span></div><button type="button" class="sw on" id="sf-on" onclick="this.classList.toggle(\'on\')" aria-label="가동 여부"></button></div>'+
    '<div class="setgrp-d">'+ic("shield-alert",12)+' 로그인·페이월 우회가 필요한 소스는 등록해도 수집 단계에서 차단됩니다(L5 접근통제).</div>'+
   '</div><div class="modal-f"><button class="btn" onclick="closeDlg()">취소</button><button class="btn primary" onclick="saveSrc()">'+ic("check",13)+'등록</button></div></div>';
 }
 const BACKFILL_LABEL={none:"신규분만","3m":"최근 3개월","12m":"최근 12개월",all:"전체 아카이브"};
+/* 계약 상태 칩 — 근거는 권리 원장뿐이다. 자기신고 값으로 “계약됨”을 표시하지 않는다.
+   ‘자동 적재’는 그 계약이 적재 3용도를 실제로 커버할 때만 붙는다. */
 function srcLicChip(s){
-  if(s.licenseId){
-    const l=DB.licenses.find(x=>x.id===s.licenseId);
-    if(!l)return ' · <span style="color:var(--warn);font-weight:700">원장 레코드 없음</span>';
-    const st=licStatus(l);
-    if(l.revoked||st.k==="expired")return ' · <span style="color:var(--risk);font-weight:700">'+esc(s.licenseId)+' 계약 종료 — 수집 중지</span>';
-    return ' · <span style="color:'+(st.k==="expiring"?"var(--warn)":"var(--ok)")+';font-weight:700">'+esc(s.licenseId)+' · '+esc(st.label)+'</span>';
-  }
-  return s.licensed?' · <span style="color:var(--ok);font-weight:700">계약됨</span>':' · <span style="color:var(--warn);font-weight:700">미계약</span>';
+  const chip=(c,t,x)=>' · <span style="color:var('+c+');font-weight:700"'+(x?' title="'+esc(x)+'"':'')+'>'+esc(t)+'</span>';
+  if(!s.licenseId)return chip("--t3","계약 없음 — 문서별 판정","이 소스의 자료는 문서마다 저작권 표기로 판정합니다. L1·L2 자료는 계약 없이도 자동 적재됩니다.");
+  const l=DB.licenses.find(x=>x.id===s.licenseId);
+  if(!l)return chip("--warn","원장 레코드 없음","연결된 계약이 권리 원장에서 삭제되었습니다.");
+  const st=licStatus(l);
+  if(l.revoked||st.k==="expired")return chip("--risk",s.licenseId+" 계약 종료 — 수집 중지","갱신 전에는 재가동하지 마세요.");
+  const gap=bundleGapOf(l);
+  if(gap)return chip("--warn",s.licenseId+" · "+st.label+" · "+gap+" → 문서별 판정",
+    "계약은 유효하지만 적재 3용도(사내 열람·AI 인덱싱·교육 게시)를 다 채우지 못해 이 계약만으로는 적재되지 않습니다.");
+  return chip("--ok",s.licenseId+" · "+st.label+" · 자동 적재",
+    "적재 3용도를 모두 커버하는 유효 계약 — 이 소스의 자료는 별도 승인 없이 적재됩니다.");
 }
 function saveSrc(){
   const name=val("sf-name");if(!name){toastMsg("소스 이름을 입력해주세요");return;}
   let url=val("sf-url");if(!url){toastMsg("수집 주소를 입력해주세요");return;}
   if(!/^https?:\/\//i.test(url))url="https://"+url;
   const auth=val("sf-auth"),licref=val("sf-licref"),back=val("sf-back")||"none";
-  const s={name,url,kind:val("sf-kind")||"RSS",backfill:back,licenseId:licref||null,licensed:!!licref,
+  const s={name,url,kind:val("sf-kind")||"RSS",backfill:back,licenseId:licref||null,
    auth:auth?"••••"+auth.slice(-4):"",
    schedule:val("sf-sched")||"1일 1회",on:document.getElementById("sf-on").classList.contains("on")};
   DB.settings.sources.push(s);
@@ -1569,13 +1617,22 @@ function applyManualUp(){
 }
 
 /* 라이선스 등록 폼 — 저장 즉시 보류함 재평가, 잔존 조항 포함 */
-function openLicForm(prefillScope){dialog={type:"lic",scope:prefillScope||""};renderDialog();}
+let _licPreSrc=null; /* 보류 문서에서 열었을 때 자동 체크할 소스 (사람이 해제 가능) */
+function openLicForm(prefillScope){
+  _licPreSrc=prefillScope?srcForDoc({source:prefillScope}):null;
+  dialog={type:"lic",scope:prefillScope||""};renderDialog();
+}
 function licDlg(){
   return '<div class="modal sm" role="dialog" aria-modal="true"><div class="modal-h">'+ic("book-key",16)+'라이선스 등록<button class="modal-x" onclick="closeDlg()" aria-label="닫기">'+ic("x",16)+'</button></div>'+
   '<div class="modal-body">'+
    '<div class="fld"><label>라이선스 이름 (필수)</label><input id="lf-name" placeholder="예: RefSci Review 사내 교육 라이선스" /></div>'+
    '<div class="fld"><label>범위 — 출처 매칭 문자열 (필수)</label><input id="lf-scope" value="'+esc(dialog.scope)+'" placeholder="예: Refrigeration Science Review" />'+
     '<div class="setgrp-d">이 문자열이 포함된 출처의 문서가 라이선스 대상이 됩니다. 매칭이 애매하면 재평가 결과를 반드시 확인하세요(범위 초과 방지).</div></div>'+
+   '<div class="fld"><label>적용할 수집 소스 (선택 · 복수 가능)</label><div class="chipline">'+
+    (DB.settings.sources.length?DB.settings.sources.map((s,i)=>
+      '<label class="sig"><input type="checkbox" id="lf-src-'+i+'"'+(s===_licPreSrc?" checked":"")+' /> '+esc(s.name)+(s.licenseId?esc(" (현재 "+s.licenseId+")"):"")+'</label>').join("")
+     :'<span style="color:var(--t3);font-size:12px">등록된 수집 소스가 없습니다</span>')+'</div>'+
+    '<div class="setgrp-d">선택한 소스의 자료는 <b>출처 문자열과 무관하게</b> 이 계약으로 적재 자격을 판정합니다. 계약이 만료·해지되면 선택한 소스의 <b>수집이 자동 중지</b>됩니다. 이미 다른 계약에 연결된 소스를 고르면 그 연결을 대체합니다.</div></div>'+
    '<div class="frow"><div class="fld"><label>시작일</label><input id="lf-start" type="date" value="'+addDays(0)+'" /></div>'+
     '<div class="fld"><label>만료일</label><input id="lf-end" type="date" value="'+addDays(365)+'" /></div></div>'+
    '<div class="fld"><label>허용 용도 — 적재 필수 번들 + 선택</label><div class="chipline">'+
@@ -1602,7 +1659,9 @@ function saveLic(){
    survival:chk("lf-sv"),
    start:val("lf-start"),end:val("lf-end"),obligations:val("lf-ob")||"—",contact:val("lf-ct")||"—",file:val("lf-file")||"(미첨부)",revoked:false};
   DB.licenses.push(l);
-  audit("—","라이선스 등록: "+l.id+" · "+l.name,"관리자","범위 “"+scope+"” · "+l.start+"~"+l.end+(l.survival?" · 잔존 조항 포함":" · 잔존 조항 없음"));
+  const linked=[];
+  DB.settings.sources.forEach((s,i)=>{if(chk("lf-src-"+i)){s.licenseId=l.id;linked.push(s.name);}});
+  audit("—","라이선스 등록: "+l.id+" · "+l.name,"관리자","범위 “"+scope+"” · "+l.start+"~"+l.end+(l.survival?" · 잔존 조항 포함":" · 잔존 조항 없음")+(linked.length?" · 소스 연결: "+linked.join(", "):""));
   const n=reEvaluateAll("시스템(권리 원장)",l.id+" 등록에 따른 재평가");
   closeDlg();
   toastMsg((l.uses.ai&&l.uses.education)?("등록 완료 — "+n+"건이 원본 확보 → 업로드 대기로 이동합니다"):"등록됨 — 단, AI·교육 용도 미포함이라 이 라이선스로는 적재가 불가합니다(문서는 보류 유지)");

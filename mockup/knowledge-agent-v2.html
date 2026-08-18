@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ai 365 AI AGENT — 지식 수집·적재 에이전트</title>
+<title>Ai 365 AI AGENT — 교육 에이전트</title>
 <meta name="color-scheme" content="light" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 24'%3E%3Cpath d='M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z' fill='none' stroke='%232E6BE6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ctext x='15.8' y='22.5' font-family='sans-serif' font-weight='800' font-size='12' fill='%23F4731C'%3E3%3C/text%3E%3C/svg%3E" />
 <style>
@@ -53,7 +53,7 @@ input[type=range]{accent-color:var(--orange)}
   background:rgba(255,255,255,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh-sm)}
 .hd-l{display:flex;align-items:center;gap:12px;min-width:0}
-.kd-svg{height:38px;width:38px;display:block;flex-shrink:0;filter:drop-shadow(0 2px 5px rgba(27,42,107,.28))}
+.kd-svg{height:30px;width:45px;display:block;flex-shrink:0;filter:drop-shadow(0 2px 5px rgba(27,42,107,.22))}
 .brand{display:flex;align-items:baseline;gap:7px;letter-spacing:-.02em;white-space:nowrap}
 .brand b{font-weight:800;font-size:16.5px;color:var(--navy)}
 .brand span{font-weight:700;color:var(--t3);font-size:11px;letter-spacing:.09em}
@@ -453,18 +453,103 @@ input[type=range]{accent-color:var(--orange)}
   .brand span{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition:none!important}}
+
+/* ══ 워크스페이스 전환 + 동영상 제작 + 교육 대시보드 ══ */
+.ws-seg{display:inline-flex;background:var(--s2);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px;margin-left:14px}
+.ws-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--t2);padding:6px 13px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.ws-seg button.active{background:var(--s0);color:var(--navy);box-shadow:0 1px 4px rgba(15,30,70,.10)}
+.ws-seg button:hover:not(.active){color:var(--t1)}
+.yt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+.yt-card{background:var(--s0);border:1px solid var(--line);border-radius:13px;padding:13px 14px;display:flex;flex-direction:column;gap:8px}
+.yt-card.dim{opacity:.62}
+.yt-top{display:flex;gap:10px;align-items:flex-start}
+.yt-thumb{width:64px;height:44px;border-radius:8px;background:linear-gradient(135deg,#1f2937,#4b5563);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.yt-thumb .dur{position:absolute;right:3px;bottom:3px;background:rgba(0,0,0,.75);font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px}
+.yt-tt{font-weight:800;font-size:13.5px;line-height:1.35;color:var(--t1)}
+.yt-meta{font-size:11.5px;color:var(--t3);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.yt-lic{font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px}
+.yt-lic.cc{background:var(--ok-bg);color:var(--ok)}
+.yt-lic.own{background:#EEF2FF;color:#4338CA}
+.yt-lic.std{background:var(--risk-bg);color:var(--risk)}
+.yt-foot{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.qcard{background:var(--s0);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.qcard-q{font-weight:800;font-size:13px;color:var(--t1);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.qcard-q .qno{background:var(--navy);color:#fff;font-size:10.5px;font-weight:800;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.qopts{display:flex;flex-wrap:wrap;gap:6px}
+.qopt{border:1.5px solid var(--line);background:var(--s0);border-radius:99px;padding:6px 13px;font:inherit;font-size:12.5px;font-weight:700;color:var(--t2);cursor:pointer}
+.qopt.sel{border-color:var(--navy);background:#EEF4FF;color:var(--navy)}
+.vjob{display:flex;gap:12px;align-items:center;background:var(--s0);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+.vjob .bar{flex:1;height:7px;background:var(--s2);border-radius:99px;overflow:hidden}
+.vjob .bar i{display:block;height:100%;background:var(--navy);border-radius:99px;transition:width .5s}
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:12px}
+.edu-card{background:var(--s0);border:1px solid var(--line);border-radius:15px;padding:15px 18px 16px;box-shadow:0 1px 2px rgba(15,30,70,.04)}
+.edu-card h4{margin:0 0 12px;font-size:12.5px;color:var(--t2);letter-spacing:.01em;display:flex;align-items:center;gap:6px}
+.edu-card h4 svg{color:var(--t3)}
+.edu-card h4 .cap{margin-left:auto;font-size:10.5px;color:var(--t3);font-weight:600;background:var(--s2);padding:2px 9px;border-radius:99px;white-space:nowrap}
+/* KPI 타일 — 라벨 · 값 · 증감 델타 · 12포인트 스파크라인 */
+.ekpi{background:var(--s0);border:1px solid var(--line);border-radius:15px;padding:13px 16px 12px;box-shadow:0 1px 2px rgba(15,30,70,.04)}
+.ekpi .lb{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.02em;display:flex;gap:5px;align-items:center;margin-bottom:7px}
+.ekpi .val{font-size:26px;font-weight:800;color:var(--t1);letter-spacing:-.02em;line-height:1}
+.ekpi .val small{font-size:12px;color:var(--t3);font-weight:700;margin-left:1px}
+.ekpi .foot{display:flex;align-items:baseline;gap:7px;margin-top:8px;min-height:20px}
+.ekpi .hint{font-size:10.5px;color:var(--t3);line-height:1.4}
+.delta{font-size:11px;font-weight:800;white-space:nowrap}
+.delta.up{color:var(--ok)}.delta.down{color:var(--risk)}
+.spark{margin-left:auto;flex:none}
+.edu-tbl tbody tr:hover td,.edu-tbl tr:hover td{background:#F7F9FD}
+.avx{width:22px;height:22px;border-radius:50%;background:#E8EEFB;color:#3B5BBF;font-size:10.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-right:7px;flex:none;vertical-align:-6px}
+.duep{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.duep.over{background:var(--risk-bg);color:var(--risk)}
+.duep.soon{background:var(--warn-bg);color:var(--warn-tx)}
+.hbar .tr{position:relative;overflow:visible}
+.hbar .tr i{position:relative;z-index:1}
+.hbar .tr .avg{position:absolute;top:-3px;bottom:-3px;width:2px;background:#7F8694;border-radius:2px;opacity:.5;z-index:2}
+.vsrow{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;margin:2px 0 12px}
+.vsnum{font-size:29px;font-weight:800;letter-spacing:-.02em;color:var(--t1);line-height:1.1}
+.vslb{font-size:11px;color:var(--t3);font-weight:700;margin-top:3px}
+.vsmid{font-size:10.5px;font-weight:800;color:var(--t3);background:var(--s2);border-radius:99px;padding:3px 9px}
+svg .wkhit:hover{fill:rgba(46,107,230,.06)}
+/* 차트 전용 색 — 브랜드 네이비는 마크로 쓰기에 너무 어두워 로고 블루 계열로(검증 통과: #2E6BE6+#0E9F5C) */
+:root{--viz-1:#2E6BE6;--viz-1t:#E3EBFC;--viz-2:#0E9F5C;--viz-2t:#DDF2E7;--viz-grid:#EDEFF4;--viz-axis:#C9CDD6}
+.hbar{display:grid;grid-template-columns:88px 1fr 52px;gap:8px;align-items:center;margin-bottom:8px;font-size:12px}
+.hbar .lb{color:var(--t2);font-weight:700;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar .tr{height:8px;background:var(--viz-1t);border-radius:0 4px 4px 0;overflow:hidden}
+.hbar .tr i{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--viz-1)}
+.hbar.g .tr{background:var(--viz-2t)}.hbar.g .tr i{background:var(--viz-2)}
+.hbar .pc{color:var(--t1);font-weight:800;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hbar .pc.low{color:var(--warn-tx)}.hbar .pc svg{vertical-align:-1px;margin-right:1px}
+#viztip{position:fixed;pointer-events:none;background:#181C25;color:#fff;font-size:11.5px;font-weight:600;line-height:1.5;padding:6px 10px;border-radius:8px;opacity:0;transition:opacity .12s;z-index:999;max-width:260px;box-shadow:0 6px 20px rgba(15,30,70,.25)}
+.edu-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.edu-tbl th{text-align:left;color:var(--t3);font-size:10.5px;letter-spacing:.05em;padding:5px 8px;border-bottom:1px solid var(--line)}
+.edu-tbl td{padding:7px 8px;border-bottom:1px solid var(--s2);color:var(--t1);vertical-align:middle}
+.edu-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.estat{background:var(--s0);border:1px solid var(--line);border-radius:13px;padding:12px 16px}
+.estat .en{font-size:23px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
+.estat .en small{font-size:12px;font-weight:700;color:var(--t3);margin-left:2px}
+.estat .el{font-size:11.5px;font-weight:700;color:var(--t2);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.estat .eh{font-size:10.5px;color:var(--t3);margin-top:3px;line-height:1.45}
+.vleg{display:flex;gap:14px;font-size:11px;color:var(--t2);margin-top:6px}
+.vleg i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--viz-1);margin-right:4px;vertical-align:-1px}
+.vleg i.done{background:var(--viz-2)}
+@media (max-width:900px){.edu-strip{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:900px){.ws-seg{margin-left:6px}.ws-seg button{padding:6px 9px;font-size:11.5px}.ws-seg button svg{display:none}}
 </style>
 </head>
 <body>
 <div class="app" id="app"></div>
 <div id="modalroot"></div>
 <div id="dlgroot"></div>
+<div id="viztip" role="tooltip"></div>
 <div class="toastwrap" id="toastroot" role="status" aria-live="polite"></div>
 <script>
 /* ═════════════════════════════════════════════════════════════════
    1) 유틸 + 아이콘
    ═════════════════════════════════════════════════════════════════ */
 const ICONS={
+"play":'<polygon points="6 3 20 12 6 21 6 3"/>',
+"chart-column":'<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M13 17V9"/><path d="M18 17V5"/><path d="M8 17v-3"/>',
+"sparkles":'<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+"send":'<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
 "calendar":'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
 "rotate-cw":'<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>',
 "check":'<path d="M20 6 9 17l-5-5"/>',
@@ -660,6 +745,113 @@ DB.settings.conn={
 };
 DB.licenses[0].survival=true;   /* LIC-001: 계약 종료 후 기적재분 유지 조항 포함 */
 DB.licenses[1].survival=false;  /* LIC-002: 잔존 조항 없음 — 만료 시 기적재분이 리스크 */
+
+/* ══ 동영상 제작 에이전트 데이터 ══
+   링크는 복제가 아니므로 수집 자체는 자유 — 문서 파이프라인과 분리해 링크만 모은다.
+   그러나 '재생성'은 2차적저작물 작성이므로 사람이 근거를 남기고 승인해야 다음 단계로 간다.
+   승인 근거 3종: ccby(원 영상의 CC-BY 표기) / own(자사 채널) / granted(권리자 허락 → 원장 연결).
+   표준 YouTube 라이선스(std)는 재사용 불허가 기본값 — granted 없이는 승인 불가. */
+DB.videos={
+ spUrl:"https://ai365.sharepoint.com/sites/EDU/생성콘텐츠", /* 스튜디오 전용 SP 위치 — 교육 에이전트 라이브러리와 분리 */
+ folder:"교육자료 > 생성 동영상", /* 영상 산출물 폴더 — 적재 시 RAG·Viva 동시 전파(분리 불가) */
+ docFolder:"교육자료 > 생성 교육문서", /* 문서 산출물 폴더 — 영상과도 분리 */
+ textFolder:"교육자료 > 추출 텍스트", /* 중간 소재 폴더 — 추출 텍스트는 여기 보관되어 영상·문서 생성에 재사용 */
+ /* 동영상 수집 소스 — 문서 소스와 분리. 링크만 수집(원본 미복제)하므로 계약 연결·L5 판정이 없다.
+    권리 문제는 수집이 아니라 '재생성 승인' 단계에서 근거로 다룬다. */
+ sources:[
+  {name:"키워드 검색",kind:"YouTube 검색",query:"히트펌프, 냉매, 콘덴싱, EPBD",schedule:"1일 1회",on:true},
+  {name:"채널 구독: HVAC Open Academy",kind:"YouTube 채널",query:"@hvac-open-academy",schedule:"1일 1회",on:true},
+  {name:"채널 구독: Ai 365 공식",kind:"YouTube 채널",query:"@ai365-official",schedule:"1일 1회",on:true}
+ ],
+ /* 재구성 허락 원장 — 문서 계약 원장(DB.licenses)과 완전 분리.
+    핵심 허용 항목이 다르다: 문서 원장은 '적재 3용도', 이 원장은 '재구성(2차적저작물 작성 · 매체 불문)' + 3용도.
+    승인된 링크의 추출 텍스트가 영상·문서 산출물 전체의 소재가 되므로, 허락은 매체 불문으로 받는 것이 원칙. */
+ licenses:[
+  {id:"VL-001",name:"Refrigerant Pro 채널 재구성 허락",scope:"Refrigerant Pro",
+   start:addDays(-30),end:addDays(335),uses:{regen:true,internal:true,ai:true,education:true},
+   survival:true,contact:"studio@refpro.example",file:"허락서_RefrigerantPro_2026.pdf",revoked:false}
+ ],
+ /* 사내 교육 문서함 — '기존 문서 업데이트'의 대상이 되는 자사 저작물 마스터.
+    자사 문서라 권리 문제가 없고, 다운로드 가능. 외부 자료는 여기 올리지 않는다(교육 에이전트 경로). */
+ docs:[
+  {id:"MD-001",name:"신입 기술교육 기본 교재.docx",size:"2.4MB",owner:"교육운영",added:"2026-05-12",ver:3,note:"최근 갱신 2026-07-02"},
+  {id:"MD-002",name:"냉매 취급 안전 수칙 매뉴얼.docx",size:"1.1MB",owner:"품질보증",added:"2026-03-28",ver:2,note:"최근 갱신 2026-06-15"},
+  {id:"MD-003",name:"보일러 설치 표준 절차서.pdf",size:"3.8MB",owner:"생산기술",added:"2026-01-19",ver:5,note:"최근 갱신 2026-08-01"},
+  {id:"MD-004",name:"협력사 온보딩 교육 자료.pptx",size:"6.2MB",owner:"교육운영",added:"2026-06-30",ver:1,note:"초판"}
+ ],
+ links:[
+  {id:"YT-001",title:"히트펌프 COP 향상 원리 10분 해설",channel:"HVAC Open Academy",url:"https://youtube.com/watch?v=hp-cop-101",
+   dur:"10:24",views:"84K",found:"키워드 수집",kw:"히트펌프",ytLic:"cc",state:"pending",licBasis:null},
+  {id:"YT-002",title:"콘덴싱 보일러 열교환기 구조와 응축수 처리",channel:"Ai 365 공식 채널",url:"https://youtube.com/watch?v=cond-hx-22",
+   dur:"08:11",views:"3.2K",found:"키워드 수집",kw:"콘덴싱",ytLic:"own",state:"approved",licBasis:{k:"own",label:"자사 채널 콘텐츠"}},
+  {id:"YT-003",title:"R-454B 냉매 전환 실무 — 설치 현장 주의점",channel:"Refrigerant Pro",url:"https://youtube.com/watch?v=r454b-field",
+   dur:"15:02",views:"127K",found:"키워드 수집",kw:"냉매",ytLic:"std",state:"pending",licBasis:null},
+  {id:"YT-004",title:"EPBD 개정이 국내 보일러 시장에 주는 영향",channel:"Energy Policy Watch",url:"https://youtube.com/watch?v=epbd-kr",
+   dur:"12:47",views:"41K",found:"키워드 수집",kw:"EPBD",ytLic:"std",state:"pending",licBasis:null},
+  {id:"YT-005",title:"인버터 압축기 제어 로직 기초 강의",channel:"Compressor Lab (CC)",url:"https://youtube.com/watch?v=inv-ctrl-1",
+   dur:"22:30",views:"58K",found:"수동 입력",kw:null,ytLic:"cc",state:"generated",licBasis:{k:"ccby",label:"CC-BY 표기 확인"}}
+ ],
+ jobs:[
+  {id:"VJ-001",link:"YT-005",kind:"video",target:null,title:"인버터 압축기 제어 기초 — 사내 교육판",
+   params:{aud:"실무자",len:"10분 표준",tone:"강의형",lang:"한국어",cap:"자막 포함"},
+   state:"ready",progress:100,stageLabel:"완료",out:{dur:"09:48",size:"142MB",format:"mp4"}}
+ ]
+};
+DB.videos.links.forEach(l=>{
+ if(l.found==="키워드 수집")audit("—","YouTube 링크 수집: "+l.id,"AI 엔진","키워드 “"+l.kw+"” · "+l.channel+" · 링크만 보관(원본 미복제)");
+});
+/* 교육 대시보드 — [BACKEND] Graph Employee Learning API(learningCourseActivity) × Entra 조직 데이터 조인.
+   모든 위젯은 실제 API 필드에 1:1 대응: status/completionPercentage/dueDateTime/assignmentType/
+   startedDateTime + learningContent.duration·skillTags + users.department·manager. 데모는 정적 표본.
+   주의: '시청 시간'은 API에 없으므로 지표로 쓰지 않는다(콘텐츠 duration 합산만 가능). */
+DB.edu={
+ asOf:"매일 06:00 동기화",
+ kpis:{courses:14,learners:214,doneRate:68,weekNew:31,overdue:9,dueSoon:14},
+ depts:[{n:"기술연구소",p:84},{n:"품질보증",p:77},{n:"생산기술",p:71},{n:"영업기술지원",p:63},{n:"구매",p:52},{n:"경영지원",p:41}],
+ courses:[
+  {t:"히트펌프 설치·시운전 실무 가이드",src:"수집 문서",type:"필수",taken:96,done:81},
+  {t:"인버터 압축기 제어 기초 — 사내 교육판",src:"생성 동영상",type:"권장",taken:88,done:74},
+  {t:"저GWP 냉매 전환 F-gas 규제 해설",src:"수집 문서",type:"필수",taken:73,done:49},
+  {t:"콘덴싱 보일러 효율 개선 기술자료",src:"수집 문서",type:"권장",taken:61,done:38},
+  {t:"R-32 냉매 안전 취급 교육",src:"생성 동영상",type:"필수",taken:57,done:52}
+ ],
+ team:[{n:"김성훈 · 기술연구소",p:100},{n:"이서연 · 기술연구소",p:85},{n:"박준영 · 품질보증",p:70},{n:"최민지 · 생산기술",p:55},{n:"정우진 · 영업기술지원",p:30}],
+ /* 마감 관리 — learningAssignment의 dueDateTime·assignmentType 기반. 초과 우선 정렬 */
+ deadlines:[
+  {n:"정우진",dept:"영업기술지원",c:"R-32 냉매 안전 취급 교육",due:-6,type:"필수"},
+  {n:"한지민",dept:"구매",c:"저GWP 냉매 전환 F-gas 규제 해설",due:-3,type:"필수"},
+  {n:"오세훈",dept:"경영지원",c:"히트펌프 설치·시운전 실무 가이드",due:-1,type:"필수"},
+  {n:"최민지",dept:"생산기술",c:"저GWP 냉매 전환 F-gas 규제 해설",due:2,type:"필수"},
+  {n:"박준영",dept:"품질보증",c:"콘덴싱 보일러 효율 개선 기술자료",due:4,type:"권장"},
+  {n:"이서연",dept:"기술연구소",c:"인버터 압축기 제어 기초 — 사내 교육판",due:6,type:"권장"}
+ ],
+ /* 출처별 성과 — 콘텐츠 ID ↔ 적재 기록 매칭: 우리 파이프라인 산출물별 교육 기여 비교 */
+ srcCompare:[
+  {label:"수집 문서 기반",n:12,taken:287,doneRate:61},
+  {label:"생성 동영상 기반",n:2,taken:145,doneRate:78}
+ ],
+ /* 보조 지표 — assignmentType(required)·status(inProgress)·duration 합산·활동 유형(배정/자기주도) 비중 */
+ strip:{requiredRate:81,inProgress:47,doneHours:214,selfRatio:28},
+ /* KPI 증감 — 지난달·지난주 대비. 스파크는 12주 추이(값은 스케일만 의미) */
+ deltas:{courses:"+2 이번 달",learners:"+12 이번 달",done:"▲ 2.4%p 지난달",week:"▲ 7 지난주",dead:"▼ 3 지난주"},
+ sparks:{done:[58,59,61,60,62,62,64,65,65,66,67,68],week:[14,18,22,19,27,24,31,26,29,25,28,31]},
+ /* 주간 추이 — startedDateTime·completedDateTime 시계열 (최근 8주) */
+ weeks:[
+  {w:"6/22",s:18,c:11},{w:"6/29",s:22,c:14},{w:"7/06",s:19,c:16},{w:"7/13",s:27,c:18},
+  {w:"7/20",s:24,c:20},{w:"7/27",s:31,c:22},{w:"8/03",s:29,c:25},{w:"8/10",s:31,c:24}
+ ],
+ /* 스킬 태그 분포 — learningContent.skillTags 집계 */
+ skills:[
+  {n:"히트펌프·공조",v:34},{n:"냉매·냉동",v:27},{n:"규제·인증",v:22},{n:"보일러·난방",v:18},{n:"시장·전략",v:9}
+ ],
+ /* 배정자별 현황 — learningAssignment.assignerUserId × Entra 조인 */
+ assigners:[
+  {n:"김성훈 팀장",dept:"기술연구소",cnt:42,p:83},
+  {n:"박준영 파트장",dept:"품질보증",cnt:31,p:74},
+  {n:"이도현 팀장",dept:"생산기술",cnt:28,p:66},
+  {n:"HR 교육운영",dept:"전사 필수",cnt:96,p:71}
+ ]
+};
 
 /* ── 라이선스 카탈로그: 라이선스 '종류'의 사전 (명세 PART 1)
    판정 순서: ①코드 정확 매칭(호출#5 생략) ②미스만 AI 신호 추출 ③사람 확정분은 카탈로그에 축적
@@ -1004,13 +1196,22 @@ function counts(){
   c.expiring=DB.licenses.filter(l=>licStatus(l).k==="expiring").length;
   return c;}
 
+/* 워크스페이스: agent(기존 교육 에이전트) / video(동영상 제작) / edu(교육 대시보드) */
+let workspace="agent";
+function setWorkspace(w){workspace=w;if(w==="video"&&!vTab)vTab="inbox";render();}
+function wsSeg(){
+  const B=(w,icon,label)=>'<button class="'+(workspace===w?"active":"")+'" onclick="setWorkspace(\''+w+'\')">'+ic(icon,13)+esc(label)+'</button>';
+  return '<span class="ws-seg" role="tablist">'+B("agent","database","교육 에이전트")+B("video","sparkles","콘텐츠 스튜디오")+B("edu","chart-column","교육 대시보드")+'</span>';
+}
 function render(){
+  if(workspace==="video")return renderVideoWs();
+  if(workspace==="edu")return renderEduWs();
   const c=counts(),app=document.getElementById("app");
   const expLic=DB.licenses.filter(l=>licStatus(l).k==="expiring"&&!l.revoked);
   app.innerHTML=
-  '<div class="hd"><div class="hd-l"><svg class="kd-svg" viewBox="0 0 26 24" aria-label="Ai 365 로고"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" fill="none" stroke="#2E6BE6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><text x="15.8" y="22.5" font-family="Pretendard Variable, Pretendard, sans-serif" font-weight="800" font-size="12" fill="#F4731C">3</text></svg>'+
+  '<div class="hd"><div class="hd-l"><svg class="kd-svg" viewBox="0 0 30 20" fill="none" aria-label="Ai 365 로고"><path d="M5.83407 19.994H5.80736C2.72101 19.9789 0.174765 17.5252 0.00857675 14.4069C-0.077485 12.765 0.486368 11.2043 1.59924 10.0166C2.7121 8.82576 4.2167 8.17022 5.83407 8.17022C6.0329 8.17022 6.23173 8.17924 6.43057 8.20029C6.31186 7.59286 6.27625 6.96739 6.32373 6.33891C6.57301 3.03415 9.21422 0.321782 12.4697 0.0270903C15.1465 -0.213475 17.7195 1.16376 19.0223 3.53633C19.2508 3.95431 19.1024 4.48356 18.6899 4.7151C18.2774 4.94664 17.7551 4.79629 17.5266 4.37831C16.5502 2.60414 14.6302 1.57272 12.6211 1.75314C10.1906 1.97266 8.21709 3.99942 8.03013 6.46822C7.97968 7.12376 8.0509 7.76727 8.23786 8.38672C8.37141 8.82275 8.26457 9.30087 7.9589 9.63165C7.65324 9.96543 7.19028 10.1068 6.75404 10.0075C6.45431 9.93837 6.14567 9.90228 5.83407 9.90228C4.69152 9.90228 3.62614 10.3654 2.83971 11.2073C2.05329 12.0493 1.65562 13.1499 1.71497 14.3136C1.83071 16.4787 3.66769 18.2499 5.81329 18.2619C6.0329 18.2619 6.25251 18.2469 6.46618 18.2138C6.93507 18.1386 7.37131 18.4664 7.44253 18.9385C7.51376 19.4106 7.19325 19.8557 6.72733 19.9278C6.43353 19.9729 6.1338 19.997 5.83407 19.997V19.994Z" fill="url(#lg1)"/><path d="M9.89101 19.9941C9.70999 19.9941 9.52896 19.9369 9.37464 19.8167C8.99775 19.528 8.92653 18.9837 9.21142 18.6018L17.5743 7.47267C17.5743 7.47267 17.5772 7.46665 17.5802 7.46365C18.5654 6.07438 20.162 5.33465 21.8477 5.49402C24.0497 5.69549 25.8332 7.45763 26.0884 9.67684C26.1715 10.4015 26.0944 11.1293 25.8629 11.8089C26.8749 11.869 27.8186 12.317 28.5367 13.0808C29.2965 13.8867 29.6941 14.9332 29.6615 16.0278C29.5932 18.253 27.8186 19.9971 25.6195 19.9971H18.3132C17.8413 19.9971 17.4585 19.6092 17.4585 19.131C17.4585 18.6529 17.8413 18.265 18.3132 18.265H25.6195C26.8867 18.265 27.9106 17.2607 27.9491 15.9766C27.967 15.3512 27.7355 14.7468 27.2963 14.2807C26.8571 13.8146 26.2754 13.5499 25.6581 13.5409C25.5988 13.5409 25.5424 13.5409 25.486 13.5439C24.931 13.574 24.4562 13.3575 24.1862 12.9515C23.9191 12.5516 23.8983 12.0374 24.1268 11.5412C24.3642 11.03 24.4533 10.4587 24.388 9.88433C24.2247 8.47402 23.0911 7.35539 21.6933 7.22609C20.628 7.12986 19.619 7.58694 18.9898 8.45598C18.9809 8.47101 18.969 8.48605 18.9572 8.50108L10.5736 19.6573C10.4044 19.8798 10.1492 20.0001 9.89101 20.0001V19.9941Z" fill="url(#lg2)"/><defs><linearGradient id="lg1" x1="0" y1="9.99851" x2="19.1291" y2="9.99851" gradientUnits="userSpaceOnUse"><stop stop-color="#5361AA"/><stop offset="1" stop-color="#495495"/></linearGradient><linearGradient id="lg2" x1="9.03633" y1="12.732" x2="29.6615" y2="12.732" gradientUnits="userSpaceOnUse"><stop stop-color="#EAA923"/><stop offset="1" stop-color="#DD7117"/></linearGradient></defs></svg>'+
     '<div><div class="brand"><b>Ai 365</b><span>AI AGENT</span></div>'+
-    '<div class="hd-sub">'+esc(dateStr)+' · SharePoint(원본) → 사내 AI RAG · Viva Learning</div></div></div>'+
+    '<div class="hd-sub">'+esc(dateStr)+' · SharePoint(원본) → 사내 AI RAG · Viva Learning</div></div>'+wsSeg()+'</div>'+
     '<div class="hd-r">'+
       '<span class="live" title="가동 중인 수집 소스 수 — 설정 > 수집 소스에서 관리"><i></i>파이프라인 가동 · 소스 '+DB.settings.sources.filter(s=>s.on).length+'개</span>'+
       (function(){const n=notifItems().length;return '<button class="btn bellb" onclick="openNotif()" aria-label="알림 '+n+'건 열기" title="알림">'+ic("bell-ring",14)+(n?'<i class="bdg">'+n+'</i>':'')+'</button>';})()+
@@ -1039,7 +1240,9 @@ function render(){
   renderView();
 }
 function kpi(tone,icon,label,num,hint,view,filter){
-  return '<button class="kpi '+tone+(activeView===view?" cur":"")+'" onclick="setView(\''+view+'\''+(filter?',\''+filter+'\'':'')+')" title="'+esc(label)+' 화면으로 이동"><div class="kpi-top"><span class="kpi-ico">'+ic(icon,15)+'</span>'+esc(label)+'<span class="kpi-go">'+ic("arrow-right",12)+'</span></div><div class="kpi-num">'+num+'<small>건</small></div><div class="kpi-hint">'+esc(hint)+'</div></button>';}
+  /* view가 없으면(워크스페이스 자체 KPI) 이동 없는 표시 전용 카드 */
+  const clickable=!!view;
+  return '<button class="kpi '+tone+(clickable&&activeView===view?" cur":"")+'"'+(clickable?' onclick="setView(\''+view+'\''+(filter?',\''+filter+'\'':'')+')" title="'+esc(label)+' 화면으로 이동"':' style="cursor:default"')+'><div class="kpi-top"><span class="kpi-ico">'+ic(icon,15)+'</span>'+esc(label)+(clickable?'<span class="kpi-go">'+ic("arrow-right",12)+'</span>':'')+'</div><div class="kpi-num">'+num+'<small>'+(typeof num==="number"?"건":"")+'</small></div><div class="kpi-hint">'+esc(hint)+'</div></button>';}
 function tabBtn(v,icon,label,cnt){
   return '<button class="tab'+(activeView===v?" active":"")+'" role="tab" onclick="setView(\''+v+'\')">'+ic(icon,14)+esc(label)+'<span class="cnt">'+cnt+'</span></button>';}
 function pipeHTML(c){
@@ -1339,6 +1542,8 @@ function renderDialog(){
   else if(dialog.type==="notif")inner=notifDlg();
   else if(dialog.type==="bulk")inner=bulkDlg();
   else if(dialog.type==="manup")inner=manupDlg();
+  else if(dialog.type==="ytapprove")inner=ytApproveDlg(); /* */
+  else if(dialog.type==="vlic")inner=vLicDlg(); /* 영상 원장 등록 */
   else if(dialog.type==="confirm")inner=confirmHTML();
   r.innerHTML='<div class="mbg" onclick="if(event.target===this)closeDlg()">'+inner+'</div>';
   const fe=r.querySelector('.modal-body input:not([type=checkbox]):not([type=file]),.modal-body textarea,.modal-body select');
@@ -1742,7 +1947,7 @@ function closeSettings(){settingsOpen=false;renderModal();}
 function switchMTab(t){mTab=t;renderModal();}
 function renderModal(){
   const r=document.getElementById("modalroot");
-  if(!settingsOpen){r.innerHTML="";return;}
+  if(!settingsOpen){if(!vSettingsOpen)r.innerHTML="";return;}
   let body;
   try{body=mTab==="policy"?policyHTML():mTab==="sources"?sourcesHTML():mTab==="lic"?licRulesHTML():mTab==="conn"?connHTML():routingHTML();}
   catch(e){body='<div class="warnbox">'+ic("alert-triangle",14)+' 이 탭을 그리는 중 오류가 발생했습니다 — 아래 내용을 전달해주세요.<br><span style="font-family:ui-monospace,Consolas,monospace;font-size:11px;word-break:break-all">'+esc(String(e&&e.stack||e))+'</span></div>';}
@@ -1893,16 +2098,118 @@ function sourcesHTML(){
   '<div class="setgrp"><div class="setgrp-t">'+ic("scan-text",14)+' 수집 키워드</div>'+
    '<div class="setgrp-d">AI가 검색어를 넓혀갈 때 기준으로 삼는 키워드입니다. 쉼표로 구분.</div>'+
    '<div class="rule"><input value="'+esc(S.keywords.join(", "))+'" onchange="DB.settings.keywords=this.value.split(\',\').map(s=>s.trim()).filter(Boolean);audit(\'—\',\'설정 변경: 수집 키워드 \'+DB.settings.keywords.length+\'개\',\'관리자\',\'\');toastMsg(\'키워드 저장\')" placeholder="히트펌프, 냉매, …" /></div></div>'+
-  '<div class="setgrp"><div class="setgrp-t">'+ic("radio",14)+' 수집 소스</div>'+
-   '<div class="setgrp-d">여기 등록된 소스에서 수집이 시작됩니다. 차단 도메인은 L5(접근통제) 필터로도 쓰입니다.</div>'+
+  '<div class="setgrp"><div class="setgrp-t">'+ic("radio",14)+' 문서 수집 소스</div>'+
+   '<div class="setgrp-d">문서·데이터 자료를 가져오는 소스입니다. 수집물마다 저작권 판정이 붙고, 계약 연결·L5 필터가 적용됩니다.</div>'+
    DB.settings.sources.map((s,i)=>'<div class="srcrow"><div class="s-mid"><div class="s-name">'+esc(s.name)+'</div>'+
     '<div class="s-meta"><span class="conn-kind">'+esc(s.kind)+'</span>'+(s.url?'<span title="'+esc(s.url)+'" style="display:inline-flex;align-items:center;gap:3px">'+ic("link",10)+esc(s.url.replace(/^https?:\/\//i,"").split("/")[0])+'</span> · ':'')+(s.type?esc(s.type)+' · ':'')+esc(s.schedule)+(s.auth?' · '+ic("key",10)+' '+esc(s.auth):'')+
     (s.backfill&&s.backfill!=="none"?' · <span class="tpill">소급 '+esc(BACKFILL_LABEL[s.backfill]||s.backfill)+'</span>':'')+srcLicChip(s)+'</div></div>'+
     '<button class="sw'+(s.on?" on":"")+'" onclick="toggleSrc('+i+')" aria-label="'+esc(s.name)+'"></button></div>').join("")+
-   '<button class="miniadd" onclick="openSrcForm()">'+ic("plus",13)+'소스 추가</button></div>';
+   '<button class="miniadd" onclick="openSrcForm()">'+ic("plus",13)+'소스 추가</button></div>'+
+  '<div class="setgrp-d">'+ic("play",12)+' 동영상 수집은 여기서 다루지 않습니다 — 파이프라인이 달라 <b>콘텐츠 스튜디오의 전용 설정</b>에서 관리합니다.</div>';
 }
 function toggleSrc(i){const s=DB.settings.sources[i];s.on=!s.on;
   audit("—","소스 "+(s.on?"가동":"중지")+": "+s.name,"관리자","");renderModal();render();}
+function toggleVSrc(i){const s=DB.videos.sources[i];s.on=!s.on;
+  audit("—","동영상 소스 "+(s.on?"가동":"중지")+": "+s.name,"관리자",s.kind+" · "+s.query);renderVModal();render();}
+function addVSrc(){
+  const q=val("vs-query");if(!q){toastMsg("검색 키워드 또는 채널명을 입력해주세요");return;}
+  const kind=val("vs-kind")||"YouTube 검색";
+  const s={name:(kind==="YouTube 채널"?"채널 구독: ":"키워드 검색: ")+q.slice(0,24),kind,query:q,schedule:val("vs-sched")||"1일 1회",on:true};
+  DB.videos.sources.push(s);
+  audit("—","동영상 소스 등록: "+s.name,"관리자",kind+" · "+q+" · "+s.schedule+" · 링크만 수집(원본 미복제)");
+  toastMsg("동영상 소스를 등록했습니다 — 수집된 링크는 링크 수집함에 모입니다");
+  renderVModal();render();
+}
+/* ── 동영상 전용 설정 모달 — 문서 파이프라인 설정과 완전 분리 ── */
+let vSettingsOpen=false,vmTab="vsources";
+function openVSettings(){vSettingsOpen=true;vmTab="vsources";renderVModal();}
+function closeVSettings(){vSettingsOpen=false;renderVModal();}
+function switchVTab(t){vmTab=t;renderVModal();}
+function vSourcesHTML(){
+  return '<div class="setgrp"><div class="setgrp-t">'+ic("play",14)+' 동영상 수집 소스 — 링크만 수집</div>'+
+   '<div class="setgrp-d">YouTube에서 <b>링크만</b> 모읍니다(원본 미복제). 그래서 문서 소스와 달리 계약 연결·L5 필터가 없고, 권리 판단은 <b>재생성 승인 단계</b>에서 근거와 함께 이뤄집니다. 수집된 링크는 링크 수집함에 모입니다.</div>'+
+   DB.videos.sources.map((s,i)=>'<div class="srcrow"><div class="s-mid"><div class="s-name">'+esc(s.name)+'</div>'+
+    '<div class="s-meta"><span class="conn-kind">'+esc(s.kind)+'</span><span>'+esc(s.query)+'</span> · '+esc(s.schedule)+'</div></div>'+
+    '<button class="sw'+(s.on?" on":"")+'" onclick="toggleVSrc('+i+')" aria-label="'+esc(s.name)+'"></button></div>').join("")+
+   '<div class="rule"><select id="vs-kind" style="max-width:130px"><option>YouTube 검색</option><option>YouTube 채널</option></select>'+
+    '<input id="vs-query" placeholder="검색 키워드(쉼표 구분) 또는 @채널명" />'+
+    '<select id="vs-sched" style="max-width:110px"><option>6시간</option><option selected>1일 1회</option><option>주 1회</option></select>'+
+    '<button class="btn primary sm" onclick="addVSrc()">'+ic("plus",13)+'추가</button></div></div>';
+}
+function vStoreHTML(){
+  return '<div class="setgrp"><div class="setgrp-t">'+ic("folder",14)+' 산출물 적재 위치 — SharePoint (교육 에이전트 파이프라인과 분리)</div>'+
+   '<div class="setgrp-d">스튜디오 산출물은 교육 에이전트 라이브러리에 섞이지 않고 <b>전용 위치에 영상·문서 각각</b> 적재됩니다. 적재 순간 RAG·Viva Learning 동시 전파(분리 불가), 서비스 계정 권한이 쓰기 전용인 것은 동일한 원칙입니다.</div>'+
+   '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">사이트 링크</span><input value="'+esc(DB.videos.spUrl)+'" onchange="DB.videos.spUrl=this.value;audit(\'—\',\'연동 변경: 스튜디오 SP 링크\',\'관리자\',this.value);toastMsg(\'저장\')" /></div>'+
+   '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">추출 텍스트</span><input style="max-width:280px" value="'+esc(DB.videos.textFolder)+'" onchange="DB.videos.textFolder=this.value;audit(\'—\',\'설정 변경: 추출 텍스트 폴더\',\'관리자\',this.value);toastMsg(\'저장\')" /><span class="sig">'+ic("scan-text",10)+'중간 소재</span></div>'+
+   '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">영상 폴더</span><input style="max-width:280px" value="'+esc(DB.videos.folder)+'" onchange="DB.videos.folder=this.value;audit(\'—\',\'설정 변경: 영상 대상 폴더\',\'관리자\',this.value);toastMsg(\'저장\')" /></div>'+
+   '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">문서 폴더</span><input style="max-width:280px" value="'+esc(DB.videos.docFolder)+'" onchange="DB.videos.docFolder=this.value;audit(\'—\',\'설정 변경: 문서 대상 폴더\',\'관리자\',this.value);toastMsg(\'저장\')" /></div></div>';
+}
+function renderVModal(){
+  const r=document.getElementById("modalroot");
+  if(!vSettingsOpen){if(!settingsOpen)r.innerHTML="";return;}
+  let body;
+  try{body=vmTab==="vsources"?vSourcesHTML():vStoreHTML();}
+  catch(e){body='<div class="warnbox">'+ic("alert-triangle",14)+' 오류 — '+esc(String(e&&e.message||e))+'</div>';}
+  r.innerHTML='<div class="mbg" onclick="if(event.target===this)closeVSettings()"><div class="modal settings" role="dialog" aria-modal="true">'+
+   '<div class="modal-h">'+ic("sparkles",16)+'콘텐츠 스튜디오 설정 <span class="hint-back">교육 에이전트 파이프라인 설정과 분리 관리</span><button class="modal-x" onclick="closeVSettings()" aria-label="닫기">'+ic("x",16)+'</button></div>'+
+   '<div class="mtabs">'+
+    '<button class="mtab'+(vmTab==="vsources"?" active":"")+'" onclick="switchVTab(\'vsources\')">'+ic("radio",13)+'동영상 수집 소스</button>'+
+    '<button class="mtab'+(vmTab==="vstore"?" active":"")+'" onclick="switchVTab(\'vstore\')">'+ic("folder",13)+'산출물 적재 위치</button>'+
+   '</div><div class="modal-body">'+body+'</div>'+
+   '<div class="modal-f"><span class="note">재구성 허락 원장·사내 문서함은 워크스페이스 탭에서 관리합니다</span><button class="btn primary" onclick="closeVSettings()">닫기</button></div></div></div>';
+}
+/* ── 영상 권리 원장 — 문서 계약 원장과 완전 분리된 등록 창구 ── */
+function vRightsHTML(){
+  const L=DB.videos.licenses.filter(l=>!l.revoked);
+  const useLabel={regen:"재구성(매체 불문 · 영상·문서)",internal:"사내 열람",ai:"AI 인덱싱(RAG)",education:"교육 게시(Viva)"};
+  return '<div class="toolbar"><span style="font-size:12.5px;color:var(--t2);line-height:1.6">채널·영상의 <b>재구성 허락 계약</b>을 기록하는 스튜디오 전용 원장입니다. 추출 텍스트 하나로 영상·문서를 모두 만들 수 있으므로 허락은 <b>매체 불문</b>으로 받는 것이 원칙입니다. 문서 계약 원장과 분리 관리되며, 링크 승인의 “권리자 허락” 근거는 반드시 이 원장을 가리켜야 합니다.</span>'+
+   '<button class="btn primary sm" style="margin-left:auto" onclick="openVLicForm()">'+ic("plus",13)+'허락 계약 등록</button></div>'+
+  (L.length?'<div class="lic-grid">'+L.map(l=>{
+    const st=licStatus(l);
+    const linked=DB.videos.links.filter(k=>k.licBasis&&k.licBasis.licId===l.id);
+    return '<div class="lic-card"><div class="lic-h"><div><div class="lic-id">'+esc(l.id)+'</div><div class="lic-name">'+esc(l.name)+'</div></div>'+
+     '<span class="dday '+(st.k==="active"?"okd":st.k==="expiring"?"warnd":"exp")+'">'+esc(st.label)+'</span></div>'+
+     '<div class="lic-row"><b>범위</b><span>채널·영상 “'+esc(l.scope)+'”</span></div>'+
+     '<div class="lic-row"><b>허용</b><span class="chipline">'+Object.keys(useLabel).filter(k=>l.uses[k]).map(k=>'<span class="sig">'+useLabel[k]+'</span>').join("")+'</span></div>'+
+     '<div class="lic-row"><b>기간</b><span>'+esc(l.start)+' ~ '+esc(l.end)+'</span></div>'+
+     '<div class="lic-row"><b>잔존 조항</b><span>'+(l.survival?'<span class="sig ok">'+ic("check",10)+'포함 — 계약 종료 후 기게시분 유지 가능</span>':'<span class="dist off">'+ic("alert-triangle",10)+'없음 — 만료 시 기게시분이 위반 리스크</span>')+'</span></div>'+
+     '<div class="lic-row"><b>근거</b><span>'+ic("file-text",11)+' '+esc(l.file)+' · 문의 '+esc(l.contact)+'</span></div>'+
+     '<div class="lic-docs">'+ic("play",12)+' 이 계약으로 승인된 링크 <b>'+linked.length+'건</b>'+(linked.length?' — '+esc(linked[0].title.slice(0,20))+(linked.length>1?" 외":""):"")+'</div></div>';}).join("")+'</div>'
+   :'<div class="empty">'+ic("book-key",22)+'<p>등록된 허락 계약이 없습니다 — 권리자에게 재생성 허락을 받았다면 여기에 등록하세요.</p></div>');
+}
+function openVLicForm(prefillScope){dialog={type:"vlic",scope:prefillScope||""};renderDialog();}
+function vLicDlg(){
+  return '<div class="modal sm" role="dialog" aria-modal="true"><div class="modal-h">'+ic("book-key",16)+'영상 허락 계약 등록<button class="modal-x" onclick="closeDlg()" aria-label="닫기">'+ic("x",16)+'</button></div>'+
+  '<div class="modal-body">'+
+   '<div class="fld"><label>계약 이름 (필수)</label><input id="vl-name" placeholder="예: Refrigerant Pro 채널 재생성 허락" /></div>'+
+   '<div class="fld"><label>범위 — 채널명 또는 영상 URL (필수)</label><input id="vl-scope" value="'+esc(dialog.scope)+'" placeholder="예: Refrigerant Pro 또는 https://youtube.com/watch?v=…" />'+
+    '<div class="setgrp-d">이 채널·영상의 링크를 승인할 때 근거로 선택할 수 있게 됩니다.</div></div>'+
+   '<div class="frow"><div class="fld"><label>시작일</label><input id="vl-start" type="date" value="'+addDays(0)+'" /></div>'+
+    '<div class="fld"><label>만료일</label><input id="vl-end" type="date" value="'+addDays(365)+'" /></div></div>'+
+   '<div class="fld"><label>허락 범위</label><div class="chipline">'+
+    '<label class="sig"><input type="checkbox" checked disabled /> 재구성 — 매체 불문(영상·문서)</label>'+
+    '<label class="sig"><input type="checkbox" checked disabled /> 사내 열람</label>'+
+    '<label class="sig"><input type="checkbox" id="vl-u-ai" checked /> AI 인덱싱(RAG)</label>'+
+    '<label class="sig"><input type="checkbox" id="vl-u-edu" checked /> 교육 게시(Viva)</label></div>'+
+    '<div class="setgrp-d">추출 텍스트 하나로 영상·문서를 모두 만들 수 있으므로 허락은 <b>“재구성 — 매체 불문”</b>으로 받으세요. “영상만 허락받았는데 문서를 만든” 구멍을 계약 단계에서 막는 장치입니다. 산출물도 적재 순간 RAG·Viva에 동시 전파되므로, AI·교육이 빠진 허락으로는 게시가 보류됩니다.</div></div>'+
+   '<div class="fld"><label>잔존 조항</label><label class="sig" style="align-self:flex-start"><input type="checkbox" id="vl-sv" /> 계약 종료 후 기게시분 유지 허용</label></div>'+
+   '<div class="frow"><div class="fld"><label>권리자 문의처</label><input id="vl-ct" placeholder="studio@..." /></div>'+
+    '<div class="fld"><label>허락서 파일 (근거)</label><input id="vl-file" placeholder="허락서_XXX_2026.pdf" /></div></div>'+
+  '</div><div class="modal-f"><button class="btn" onclick="closeDlg()">취소</button><button class="btn primary" onclick="saveVLic()">'+ic("check",13)+'등록</button></div></div>';
+}
+function saveVLic(){
+  const name=val("vl-name"),scope=val("vl-scope");
+  if(!name||!scope){toastMsg("계약 이름과 범위를 입력해주세요");return;}
+  const l={id:"VL-"+String(DB.videos.licenses.length+1).padStart(3,"0"),name,scope,
+   start:val("vl-start"),end:val("vl-end"),
+   uses:{regen:true,internal:true,ai:chk("vl-u-ai"),education:chk("vl-u-edu")},
+   survival:chk("vl-sv"),contact:val("vl-ct")||"—",file:val("vl-file")||"(미첨부)",revoked:false};
+  DB.videos.licenses.push(l);
+  audit("—","영상 허락 계약 등록: "+l.id+" · "+l.name,"관리자","범위 “"+scope+"” · "+l.start+"~"+l.end+(l.survival?" · 잔존 조항 포함":" · 잔존 조항 없음")+" · 영상 전용 원장");
+  closeDlg();toastMsg("영상 원장에 등록했습니다");render();
+  /* 링크 승인 도중 등록으로 온 경우 — 새 계약이 첫 항목으로 담긴 승인 창으로 복귀 */
+  if(_ytReturn){const rid=_ytReturn;_ytReturn=null;_ytPreGrant=true;openYtApprove(rid);}
+}
 function routingHTML(){
   const cats=DB.settings.classifyRules.map(r=>r.cat).filter((c,i,a)=>a.indexOf(c)===i);
   const sample=DB.docs.find(d=>d.state==="uploaded")||DB.docs[0];
@@ -1940,7 +2247,8 @@ function connHTML(){
    '<div class="setgrp-d">서비스 계정 권한은 <b>쓰기 + 폴더 생성만</b> — 삭제·개명 권한은 부여 자체를 하지 않습니다(비가역 안전판).</div>'+
    '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">사이트 URL</span><input value="'+esc(C.sp.site)+'" onchange="DB.settings.conn.sp.site=this.value;audit(\'—\',\'연동 변경: SP 사이트\',\'관리자\',this.value);toastMsg(\'저장\')" /></div>'+
    '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">라이브러리</span><input style="max-width:200px" value="'+esc(C.sp.library)+'" onchange="DB.settings.conn.sp.library=this.value;toastMsg(\'저장\')" /></div>'+
-   '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">서비스 계정</span><input style="max-width:280px" value="'+esc(C.sp.account)+'" onchange="DB.settings.conn.sp.account=this.value;toastMsg(\'저장\')" /><span class="sig">'+ic("lock",10)+'쓰기+폴더 생성만</span></div></div>';
+   '<div class="rule"><span style="min-width:80px;font-size:12px;font-weight:700">서비스 계정</span><input style="max-width:280px" value="'+esc(C.sp.account)+'" onchange="DB.settings.conn.sp.account=this.value;toastMsg(\'저장\')" /><span class="sig">'+ic("lock",10)+'쓰기+폴더 생성만</span></div>'+
+   '<div class="setgrp-d">'+ic("play",12)+' 동영상 적재 위치는 여기서 다루지 않습니다 — <b>콘텐츠 스튜디오의 전용 설정</b>에서 관리합니다.</div></div>';
 }
 function addFolder(){
   const v=val("fld-new");if(!v)return;
@@ -2014,17 +2322,489 @@ setInterval(function(){
       if(!d.folderHoldLogged){d.folderHoldLogged=true;audit(d.title,"자동 업로드 보류 — 폴더 확인 필요","시스템(R15)","폴더 신뢰도 "+d.folderConf+"% < 임계 "+DB.settings.folderThreshold+"% — 사람 확인 후 수동 확정만 가능");}
       return;}
     doUpload(d,"시스템(대기 만료)");uploaded=true;}});
-  if(uploaded){toastMsg("대기 종료 — 자동 업로드 확정 (비가역) · RAG·Viva 배포");render();}
-  else if(activeView==="staging"&&DB.docs.some(d=>d.state==="staged"))renderView();
-  else if(activeView==="log"&&DB.docs.some(d=>d.state==="staged"))renderView();
+  /* 영상 전용 적재 트랙의 대기 만료 — 문서와 동일하게 비가역 확정 */
+  let vUploaded=false;
+  DB.videos.jobs.forEach(j=>{if(j.state==="staged"&&Date.now()>=j.stagedUntil){doVUpload(j,"시스템(대기 만료)");vUploaded=true;}});
+  if(vUploaded)toastMsg("영상 대기 종료 — 자동 업로드 확정 (비가역) · RAG·Viva 배포");
+  if(uploaded)toastMsg("대기 종료 — 자동 업로드 확정 (비가역) · RAG·Viva 배포");
+  if(uploaded||vUploaded){render();}
+  /* renderView는 교육 에이전트 전용 — 다른 워크스페이스 화면을 덮어쓰지 않는다 */
+  else if(workspace==="agent"&&activeView==="staging"&&DB.docs.some(d=>d.state==="staged"))renderView();
+  else if(workspace==="agent"&&activeView==="log"&&DB.docs.some(d=>d.state==="staged"))renderView();
+  else if(workspace==="video"&&vTab==="publish"&&DB.videos.jobs.some(j=>j.state==="staged"))render();
 },1000);
+
+/* ══ 콘텐츠 스튜디오 ══════════════════════════════
+   흐름: 링크 수집(복제 없음·자유) → 사람 승인(근거 필수) → 텍스트 추출·재생성(2차적저작물)
+        → 기존 비가역 게이트(업로드 대기 → SharePoint → RAG·Viva 동시 전파)로 합류.
+   동영상용 별도 업로드 경로를 만들지 않는다 — 게이트는 하나다. */
+let vTab="inbox",vJobSel=null,vParams=null;
+const YT_LIC_META={cc:{cls:"cc",label:"CC-BY 표기",hint:"원 영상에 CC-BY 라이선스가 표기됨 — 출처표기 조건으로 재생성 가능"},
+ own:{cls:"own",label:"자사 채널",hint:"자사 소유 콘텐츠 — 자유 이용"},
+ std:{cls:"std",label:"표준 라이선스",hint:"표준 YouTube 라이선스는 재사용을 허용하지 않음 — 권리자 허락 없이는 승인 불가"}};
+function vCounts(){
+  const p=DB.videos.links.filter(l=>l.state==="pending").length;
+  const a=DB.videos.links.filter(l=>l.state==="approved").length;
+  const run=DB.videos.jobs.filter(j=>j.state==="queue"||j.state==="extracting"||j.state==="generating").length;
+  const ready=DB.videos.jobs.filter(j=>j.state==="ready").length;
+  const pub=DB.videos.jobs.filter(j=>j.state==="staged"||j.state==="uploaded").length;
+  return{p,a,run,ready,pub};
+}
+function renderVideoWs(){
+  const c=vCounts(),app=document.getElementById("app");
+  app.innerHTML=
+  '<div class="hd"><div class="hd-l"><svg class="kd-svg" viewBox="0 0 30 20" fill="none" aria-label="Ai 365 로고"><path d="M5.83407 19.994H5.80736C2.72101 19.9789 0.174765 17.5252 0.00857675 14.4069C-0.077485 12.765 0.486368 11.2043 1.59924 10.0166C2.7121 8.82576 4.2167 8.17022 5.83407 8.17022C6.0329 8.17022 6.23173 8.17924 6.43057 8.20029C6.31186 7.59286 6.27625 6.96739 6.32373 6.33891C6.57301 3.03415 9.21422 0.321782 12.4697 0.0270903C15.1465 -0.213475 17.7195 1.16376 19.0223 3.53633C19.2508 3.95431 19.1024 4.48356 18.6899 4.7151C18.2774 4.94664 17.7551 4.79629 17.5266 4.37831C16.5502 2.60414 14.6302 1.57272 12.6211 1.75314C10.1906 1.97266 8.21709 3.99942 8.03013 6.46822C7.97968 7.12376 8.0509 7.76727 8.23786 8.38672C8.37141 8.82275 8.26457 9.30087 7.9589 9.63165C7.65324 9.96543 7.19028 10.1068 6.75404 10.0075C6.45431 9.93837 6.14567 9.90228 5.83407 9.90228C4.69152 9.90228 3.62614 10.3654 2.83971 11.2073C2.05329 12.0493 1.65562 13.1499 1.71497 14.3136C1.83071 16.4787 3.66769 18.2499 5.81329 18.2619C6.0329 18.2619 6.25251 18.2469 6.46618 18.2138C6.93507 18.1386 7.37131 18.4664 7.44253 18.9385C7.51376 19.4106 7.19325 19.8557 6.72733 19.9278C6.43353 19.9729 6.1338 19.997 5.83407 19.997V19.994Z" fill="url(#lg1)"/><path d="M9.89101 19.9941C9.70999 19.9941 9.52896 19.9369 9.37464 19.8167C8.99775 19.528 8.92653 18.9837 9.21142 18.6018L17.5743 7.47267C17.5743 7.47267 17.5772 7.46665 17.5802 7.46365C18.5654 6.07438 20.162 5.33465 21.8477 5.49402C24.0497 5.69549 25.8332 7.45763 26.0884 9.67684C26.1715 10.4015 26.0944 11.1293 25.8629 11.8089C26.8749 11.869 27.8186 12.317 28.5367 13.0808C29.2965 13.8867 29.6941 14.9332 29.6615 16.0278C29.5932 18.253 27.8186 19.9971 25.6195 19.9971H18.3132C17.8413 19.9971 17.4585 19.6092 17.4585 19.131C17.4585 18.6529 17.8413 18.265 18.3132 18.265H25.6195C26.8867 18.265 27.9106 17.2607 27.9491 15.9766C27.967 15.3512 27.7355 14.7468 27.2963 14.2807C26.8571 13.8146 26.2754 13.5499 25.6581 13.5409C25.5988 13.5409 25.5424 13.5409 25.486 13.5439C24.931 13.574 24.4562 13.3575 24.1862 12.9515C23.9191 12.5516 23.8983 12.0374 24.1268 11.5412C24.3642 11.03 24.4533 10.4587 24.388 9.88433C24.2247 8.47402 23.0911 7.35539 21.6933 7.22609C20.628 7.12986 19.619 7.58694 18.9898 8.45598C18.9809 8.47101 18.969 8.48605 18.9572 8.50108L10.5736 19.6573C10.4044 19.8798 10.1492 20.0001 9.89101 20.0001V19.9941Z" fill="url(#lg2)"/><defs><linearGradient id="lg1" x1="0" y1="9.99851" x2="19.1291" y2="9.99851" gradientUnits="userSpaceOnUse"><stop stop-color="#5361AA"/><stop offset="1" stop-color="#495495"/></linearGradient><linearGradient id="lg2" x1="9.03633" y1="12.732" x2="29.6615" y2="12.732" gradientUnits="userSpaceOnUse"><stop stop-color="#EAA923"/><stop offset="1" stop-color="#DD7117"/></linearGradient></defs></svg>'+
+    '<div><div class="brand"><b>Ai 365</b><span>콘텐츠 스튜디오</span></div>'+
+    '<div class="hd-sub">YouTube 링크 → 승인(근거 기록) → 영상·문서 생성/갱신 → 전용 적재(교육 에이전트 파이프라인과 분리 · 비가역 동일)</div></div>'+wsSeg()+'</div>'+
+    '<div class="hd-r"><button class="btn" onclick="openVSettings()">'+ic("settings",14)+'스튜디오 설정</button></div></div>'+
+  '<div class="kpis">'+
+    kpi("warn","bell-ring","승인 대기",c.p,"사람이 라이선스 근거를 확인해야 진행","")+
+    kpi("navy","check","승인됨 (생성 가능)",c.a,"근거 기록 완료 — 생성 스튜디오에서 시작","")+
+    kpi("navy","loader-2","생성 중",c.run,"텍스트 추출 → 재구성 → 렌더링","")+
+    kpi("ok","sparkles","생성 완료",c.ready,"업로드 대기로 보낼 수 있음","")+
+    kpi("ok","send","게시 대기·적재",c.pub,"스튜디오 전용 트랙 — 교육 에이전트 파이프라인과 분리","")+
+  '</div>'+
+  '<div class="tabs" role="tablist">'+
+    vTabBtn("inbox","link","링크 수집함",DB.videos.links.length)+
+    vTabBtn("studio","sparkles","생성 스튜디오",c.a+c.run+c.ready)+
+    vTabBtn("publish","send","게시 현황",c.pub)+
+    vTabBtn("docsbox","file-text","사내 문서함",DB.videos.docs.length)+
+    vTabBtn("rights","book-key","재구성 허락 원장",DB.videos.licenses.filter(l=>!l.revoked).length)+
+  '</div><div class="view" id="view"></div>';
+  const el=document.getElementById("view");
+  el.innerHTML=vTab==="inbox"?vInboxHTML():vTab==="studio"?vStudioHTML():vTab==="publish"?vPublishHTML():vTab==="docsbox"?vDocsHTML():vRightsHTML();
+}
+function vTabBtn(t,icon,label,cnt){
+  return '<button class="tab'+(vTab===t?" active":"")+'" role="tab" onclick="vTab=\''+t+'\';render()">'+ic(icon,14)+esc(label)+'<span class="cnt">'+cnt+'</span></button>';}
+function vStateChip(l){
+  if(l.state==="pending")return '<span class="sig warn">'+ic("bell-ring",10)+'승인 대기</span>';
+  if(l.state==="approved")return '<span class="sig ok">'+ic("check",10)+'승인 — '+esc(l.licBasis.label)+'</span>';
+  if(l.state==="rejected")return '<span class="sig">'+ic("x",10)+'반려</span>';
+  return '<span class="sig ok">'+ic("check-check",10)+'생성 진행·완료</span>';
+}
+function vInboxHTML(){
+  const L=DB.videos.links;
+  const vOn=DB.videos.sources.filter(s=>s.on).length;
+  return '<div class="toolbar"><span style="font-size:12.5px;color:var(--t2);line-height:1.6">가동 중인 동영상 소스 <b>'+vOn+'개</b>(문서 소스와 분리 관리)에서 모인 <b>링크 목록</b>입니다. 링크 보관은 복제가 아니라 자유롭지만, <b>재생성은 2차적저작물 작성</b>이므로 사람이 근거를 남기고 승인해야 다음 단계로 갑니다. <a onclick="openVSettings()">소스 관리 →</a></span></div>'+
+  '<div class="toolbar"><input id="yt-url" placeholder="https://youtube.com/watch?v=… — 링크 수동 추가" style="flex:1;min-width:200px" />'+
+   '<input id="yt-title" placeholder="영상 제목 (선택 — 비우면 링크에서 가져옴)" style="flex:1;min-width:160px" />'+
+   '<button class="btn primary sm" onclick="addYtLink()">'+ic("plus",13)+'링크 추가</button></div>'+
+  '<div class="yt-grid">'+L.map(l=>{
+    const lm=YT_LIC_META[l.ytLic];
+    return '<div class="yt-card'+(l.state==="rejected"?" dim":"")+'">'+
+    '<div class="yt-top"><div class="yt-thumb">'+ic("play",16)+'<span class="dur">'+esc(l.dur)+'</span></div>'+
+     '<div><div class="yt-tt">'+esc(l.title)+'</div>'+
+     '<div class="yt-meta"><span>'+esc(l.channel)+'</span><span>조회 '+esc(l.views)+'</span><span>'+esc(l.found)+(l.kw?' · “'+esc(l.kw)+'”':'')+'</span></div></div></div>'+
+    '<div class="yt-meta"><span class="yt-lic '+lm.cls+'" title="'+esc(lm.hint)+'">'+esc(lm.label)+'</span>'+vStateChip(l)+'</div>'+
+    '<div class="yt-foot">'+
+     (l.state==="pending"?'<button class="rbtn ok" onclick="openYtApprove(\''+l.id+'\')">'+ic("shield-check",13)+' 라이선스 확인·승인</button><button class="rbtn" onclick="rejectYt(\''+l.id+'\')">'+ic("x",13)+' 반려</button>':'')+
+     (l.state==="approved"||l.state==="generated"?'<button class="rbtn ok" onclick="vTab=\'studio\';vJobSel=\''+l.id+'\';vParams=null;vOutType=null;vDocTarget=null;render()">'+ic("sparkles",13)+(l.state==="generated"?' 추가 생성':' 콘텐츠 생성')+'</button>':'')+
+     '<a style="margin-left:auto;font-size:11.5px" href="'+esc(l.url)+'" target="_blank" rel="noopener">원본 열기 ↗</a>'+
+    '</div></div>';}).join("")+'</div>';
+}
+function addYtLink(){
+  const url=val("yt-url");if(!url){toastMsg("링크를 입력해주세요");return;}
+  if(!/youtu\.?be/i.test(url)){toastMsg("YouTube 링크만 등록할 수 있습니다");return;}
+  const id="YT-"+String(DB.videos.links.length+1).padStart(3,"0");
+  DB.videos.links.unshift({id,title:val("yt-title")||("수동 등록 영상 "+id),channel:"(확인 필요)",url,dur:"—",views:"—",found:"수동 입력",kw:null,ytLic:"std",state:"pending",licBasis:null});
+  audit("—","YouTube 링크 수동 등록: "+id,"관리자",url+" · 라이선스 미확인 — 승인 대기");
+  toastMsg("링크를 추가했습니다 — 라이선스 확인 후 승인해주세요");render();
+}
+function rejectYt(id){
+  const l=DB.videos.links.find(x=>x.id===id);l.state="rejected";
+  audit("—","YouTube 링크 반려: "+id,"관리자",l.title);render();
+}
+/* 승인 다이얼로그 — 근거 없는 승인은 없다. 표준 라이선스는 권리자 허락(원장 연결) 없이는 통과 불가 */
+function openYtApprove(id){dialog={type:"ytapprove",id};renderDialog();}
+function ytApproveDlg(){
+  const l=DB.videos.links.find(x=>x.id===dialog.id),lm=YT_LIC_META[l.ytLic];
+  const pre=_ytPreGrant;_ytPreGrant=false; /* 원장 등록에서 복귀 — 허락 경로를 미리 선택해 둔다 */
+  const opt=(k,t,d,dis)=>'<label class="userow" style="cursor:pointer;opacity:'+(dis?".45":"1")+'"><div class="ut"><b>'+t+'</b><span>'+d+'</span></div><input type="radio" name="ytb" value="'+k+'"'+(dis?" disabled":"")+(pre&&k==="granted"?" checked":"")+' onchange="document.getElementById(\'yt-licref-w\').style.display=this.value===\'granted\'?\'block\':\'none\'" /></label>';
+  return '<div class="modal sm" role="dialog" aria-modal="true"><div class="modal-h">'+ic("shield-check",16)+'재생성 승인 — 근거 기록<button class="modal-x" onclick="closeDlg()" aria-label="닫기">'+ic("x",16)+'</button></div>'+
+  '<div class="modal-body">'+
+   '<div style="font-weight:800;font-size:13.5px;margin-bottom:4px">'+esc(l.title)+'</div>'+
+   '<div class="yt-meta" style="margin-bottom:10px"><span>'+esc(l.channel)+'</span><span class="yt-lic '+lm.cls+'">'+esc(lm.label)+'</span></div>'+
+   /* 영상 저작권 입력 지점 — 자동 감지값은 초기값일 뿐, 사람이 영상 페이지에서 확인한 결과가 기준 */
+   '<div class="fld" style="margin-bottom:8px"><label>원 영상 라이선스 표기 — 직접 확인한 결과로 수정</label>'+
+    '<select id="yt-lic-fix" onchange="fixYtLic()">'+
+     '<option value="std"'+(l.ytLic==="std"?" selected":"")+'>표준 YouTube 라이선스 (재사용 불허가 기본값)</option>'+
+     '<option value="cc"'+(l.ytLic==="cc"?" selected":"")+'>CC-BY 표기 있음 — 영상 설명·라이선스 필드에서 확인</option>'+
+     '<option value="own"'+(l.ytLic==="own"?" selected":"")+'>자사 채널 콘텐츠</option></select>'+
+    '<div class="setgrp-d">자동 감지값은 참고용입니다. 영상 페이지에서 직접 확인한 결과로 바로잡으면 아래 승인 근거 선택지가 그에 맞춰 열립니다(수정 이력은 감사 로그에 남습니다).</div></div>'+
+   '<div class="setgrp-d" style="margin-bottom:10px">링크 공유와 달리 <b>텍스트 추출·재생성은 2차적저작물 작성</b>입니다. 아래에서 승인 근거를 선택하면 감사 로그에 근거가 함께 기록됩니다.</div>'+
+   opt("ccby","원 영상의 CC-BY 표기를 확인했습니다","출처표기 조건으로 재생성 가능 — 생성물에 원본 출처가 표기됩니다",l.ytLic!=="cc")+
+   opt("own","자사 채널 콘텐츠입니다","자사 소유 — 자유 이용",l.ytLic!=="own")+
+   opt("granted","권리자 허락을 받았습니다 — 권리 원장 연결","허락 계약을 원장에서 선택합니다. 원장에 없으면 아래에서 바로 등록하세요",false)+
+   '<div class="fld" id="yt-licref-w" style="display:'+(pre?"block":"none")+';margin-top:6px"><label>연결할 허락 계약 — 영상 권리 원장 (문서 원장과 분리)</label><select id="yt-licref">'+
+    (DB.videos.licenses.filter(x=>!x.revoked).slice().reverse().map(x=>'<option value="'+esc(x.id)+'">'+esc(x.id)+' · '+esc(x.name)+' ('+esc(licStatus(x).label)+')</option>').join("")||'<option value="">등록된 허락 계약 없음</option>')+'</select>'+
+    '<button class="miniadd" style="margin-top:6px" onclick="_ytReturn=dialog.id;openVLicForm(\''+esc(l.channel)+'\')">'+ic("plus",13)+'영상 원장에 새 허락 계약 등록 — 저장하면 이 창으로 돌아옵니다</button></div>'+
+   (l.ytLic==="std"?'<div class="setgrp-d" style="color:var(--risk)">'+ic("alert-triangle",11)+' 표준 YouTube 라이선스는 재사용을 허용하지 않습니다 — 권리자 허락 없이는 승인할 수 없습니다.</div>':'')+
+  '</div><div class="modal-f"><button class="btn" onclick="closeDlg()">취소</button><button class="btn primary" onclick="approveYt()">'+ic("check",13)+'근거 기록하고 승인</button></div></div>';
+}
+/* 사람이 영상 페이지에서 확인한 라이선스 표기로 바로잡기 — 승인 선택지가 이에 맞춰 열린다 */
+let _ytReturn=null; /* 승인 도중 원장 등록으로 갔다가 돌아올 링크 id */
+let _ytPreGrant=false; /* 복귀 시 '권리자 허락' 경로 미리 선택 */
+function fixYtLic(){
+  const l=DB.videos.links.find(x=>x.id===dialog.id);
+  const nv=val("yt-lic-fix");if(nv===l.ytLic)return;
+  const before=YT_LIC_META[l.ytLic].label;
+  l.ytLic=nv;
+  audit("—","영상 라이선스 표기 확인·수정: "+l.id,"관리자",l.title+" · "+before+" → "+YT_LIC_META[nv].label+" (영상 페이지에서 직접 확인)");
+  renderDialog();
+}
+function approveYt(){
+  const l=DB.videos.links.find(x=>x.id===dialog.id);
+  const sel=document.querySelector('input[name="ytb"]:checked');
+  if(!sel){toastMsg("승인 근거를 선택해주세요");return;}
+  const k=sel.value;
+  if(k==="granted"){
+    const vl=DB.videos.licenses.find(x=>x.id===val("yt-licref")&&!x.revoked);
+    if(!vl){toastMsg("영상 권리 원장에서 허락 계약을 먼저 등록·선택해주세요");return;}
+    if(licStatus(vl).k==="expired"){toastMsg(vl.id+" 계약이 만료되었습니다 — 갱신 없이는 승인할 수 없습니다");return;}
+  }
+  const basis=k==="ccby"?{k,label:"CC-BY 표기 확인"}:k==="own"?{k,label:"자사 채널 콘텐츠"}:{k,label:"권리자 허락",licId:val("yt-licref")};
+  l.state="approved";l.licBasis=basis;
+  audit("—","재생성 승인: "+l.id,"관리자",l.title+" · 근거: "+basis.label+(basis.licId?" ("+basis.licId+")":"")+" · 원본 "+l.url);
+  closeDlg();toastMsg("승인 완료 — 생성 스튜디오에서 동영상을 만들 수 있습니다");render();
+}
+/* 생성 스튜디오 — 산출물 3종(재생성 영상 / 신규 교육 문서 / 기존 문서 업데이트).
+   소재는 언제나 '승인된 링크의 추출 텍스트' 하나 — 승인 관문 하나가 산출물 전체의 권리 근거다.
+   기존 문서 업데이트의 대상은 사내 문서함(자사 저작물)에서만 고른다. */
+const V_QUESTIONS=[
+ {k:"aud",q:"누가 볼 영상인가요?",opts:["신입·교육생","실무자","전문가·심화"]},
+ {k:"len",q:"길이는 어느 정도가 좋을까요?",opts:["3분 요약","10분 표준","상세 강의"]},
+ {k:"tone",q:"어떤 방식으로 전달할까요?",opts:["강의형","대화형","현장 브리핑형"]},
+ {k:"lang",q:"언어를 선택해주세요",opts:["한국어","영어","한/영 이중"]},
+ {k:"cap",q:"자막을 넣을까요?",opts:["자막 포함","자막 없음"]}];
+const D_QUESTIONS_NEW=[
+ {k:"fmt",q:"어떤 형식의 문서로 만들까요?",opts:["요약 교재","실무 매뉴얼","퀴즈·체크리스트"]},
+ {k:"aud",q:"누가 볼 문서인가요?",opts:["신입·교육생","실무자","전문가·심화"]},
+ {k:"len",q:"분량은 어느 정도가 좋을까요?",opts:["2~3쪽 요약","10쪽 표준","상세 교재"]},
+ {k:"lang",q:"언어를 선택해주세요",opts:["한국어","영어","한/영 이중"]}];
+const D_QUESTIONS_UPD=[
+ {k:"mode",q:"어떻게 반영할까요?",opts:["전면 개정","변경분만 반영"]},
+ {k:"lang",q:"언어를 선택해주세요",opts:["한국어","영어"]}];
+const OUT_META={video:{label:"재생성 영상",icon:"play"},newdoc:{label:"신규 교육 문서",icon:"file-text"},updatedoc:{label:"기존 문서 업데이트",icon:"layers"}};
+let vOutType=null,vDocTarget=null;
+function vQuestionsFor(){return vOutType==="video"?V_QUESTIONS:vOutType==="newdoc"?D_QUESTIONS_NEW:D_QUESTIONS_UPD;}
+function vStudioReady(){
+  if(!vOutType)return false;
+  if(vOutType==="updatedoc"&&!vDocTarget)return false;
+  return vQuestionsFor().every(q=>vParams&&vParams[q.k]);
+}
+function vStudioHTML(){
+  /* 승인은 1회, 산출물은 여럿 — 생성을 마친 링크도 같은 근거로 다른 산출물을 더 만들 수 있다 */
+  const appr=DB.videos.links.filter(l=>l.state==="approved"||l.state==="generated");
+  const jobs=DB.videos.jobs.filter(j=>j.state!=="staged"&&j.state!=="uploaded");
+  let html='<div class="toolbar"><span style="font-size:12.5px;color:var(--t2);line-height:1.6">승인된 링크에서 추출한 텍스트를 소재로 <b>영상을 재생성하거나, 교육 문서를 새로 만들거나, 사내 문서함의 기존 문서를 갱신</b>합니다. 소재가 하나의 승인 관문을 거치므로 산출물 전체가 같은 권리 근거를 상속합니다.</span></div>';
+  if(!vJobSel||!appr.find(l=>l.id===vJobSel)){
+    html+=appr.length?'<div class="toolbar">'+appr.map(l=>'<button class="rbtn ok" onclick="vJobSel=\''+l.id+'\';vParams=null;vOutType=null;vDocTarget=null;render()">'+ic("sparkles",13)+' '+esc(l.title.slice(0,26))+'…</button>').join("")+'</div>'
+      :'<div class="empty">'+ic("link",22)+'<p>승인된 링크가 없습니다 — 링크 수집함에서 라이선스를 확인하고 승인해주세요.</p></div>';
+  }else{
+    const l=DB.videos.links.find(x=>x.id===vJobSel);
+    if(!vParams)vParams={};
+    html+='<div class="qcard" style="border-left:3px solid var(--navy)"><div class="qcard-q">'+ic("play",13)+esc(l.title)+'<span class="sig ok" style="margin-left:6px">'+esc(l.licBasis.label)+'</span></div>'+
+     '<div class="yt-meta">원본: '+esc(l.url)+' · 승인 근거가 산출물 메타데이터에 함께 기록됩니다</div></div>'+
+     '<div class="qcard"><div class="qcard-q"><span class="qno">1</span>무엇을 만들까요?</div><div class="qopts">'+
+      Object.keys(OUT_META).map(k=>'<button class="qopt'+(vOutType===k?" sel":"")+'" onclick="vOutType=\''+k+'\';vParams={};vDocTarget=null;render()">'+ic(OUT_META[k].icon,12)+' '+OUT_META[k].label+'</button>').join("")+'</div></div>';
+    if(vOutType==="updatedoc"){
+      html+='<div class="qcard"><div class="qcard-q"><span class="qno">2</span>어떤 문서를 갱신할까요? — 사내 문서함(자사 저작물)</div><div class="qopts">'+
+       (DB.videos.docs.length?DB.videos.docs.map(d=>'<button class="qopt'+(vDocTarget===d.id?" sel":"")+'" onclick="vDocTarget=\''+d.id+'\';render()">'+esc(d.name)+' <span style="color:var(--t3)">v'+d.ver+'</span></button>').join("")
+        :'<span style="color:var(--t3);font-size:12px">문서함이 비어 있습니다 — 사내 문서함 탭에서 먼저 등록해주세요</span>')+'</div></div>';
+    }
+    if(vOutType){
+      const base=vOutType==="updatedoc"?3:2;
+      html+=vQuestionsFor().map((qq,qi)=>'<div class="qcard"><div class="qcard-q"><span class="qno">'+(base+qi)+'</span>'+esc(qq.q)+'</div><div class="qopts">'+
+       qq.opts.map(o=>'<button class="qopt'+(vParams[qq.k]===o?" sel":"")+'" onclick="vParams[\''+qq.k+'\']=\''+o+'\';render()">'+esc(o)+'</button>').join("")+'</div></div>').join("");
+    }
+    html+='<div class="toolbar"><button class="btn" onclick="vJobSel=null;vParams=null;vOutType=null;vDocTarget=null;render()">취소</button>'+
+      '<button class="btn primary" style="margin-left:auto" onclick="startVJob()"'+(vStudioReady()?"":" disabled")+'>'+ic("sparkles",14)+(vOutType?OUT_META[vOutType].label:"생성")+' 시작</button></div>';
+  }
+  if(jobs.length){
+    html+='<div class="toolbar" style="margin-top:14px"><b style="font-size:12.5px">생성 큐</b></div>'+jobs.map(j=>{
+      return '<div class="vjob"><div style="flex:none">'+(j.state==="ready"?ic("check-check",16):ic("loader-2",16,"spin"))+'</div>'+
+      '<div style="flex:1.2;min-width:0"><div style="font-weight:800;font-size:12.5px">'+esc(j.title)+'</div>'+
+       '<div class="yt-meta">'+esc(j.stageLabel)+' · '+esc(Object.values(j.params).join(" · "))+'</div></div>'+
+      '<div class="bar"><i style="width:'+j.progress+'%"></i></div><span style="font-size:11.5px;font-weight:800;width:34px;text-align:right">'+j.progress+'%</span>'+
+      (j.state==="ready"?'<button class="rbtn ok" onclick="sendVJob(\''+j.id+'\')">'+ic("send",13)+' 업로드 대기로</button>':'')+
+      '</div>';}).join("");
+  }
+  return html;
+}
+function startVJob(){
+  const l=DB.videos.links.find(x=>x.id===vJobSel);
+  const id="VJ-"+String(DB.videos.jobs.length+1).padStart(3,"0");
+  const kind=vOutType,target=vDocTarget?DB.videos.docs.find(d=>d.id===vDocTarget):null;
+  const title=kind==="video"?l.title+" — 사내 교육판"
+   :kind==="newdoc"?l.title+" — "+(vParams.fmt||"교육 문서")
+   :target.name.replace(/\.[a-z0-9]+$/i,"")+" v"+(target.ver+1)+" 개정판";
+  const j={id,link:l.id,kind,target:target?target.id:null,title,params:vParams,state:"extracting",progress:8,stageLabel:"텍스트 추출 중",out:null};
+  DB.videos.jobs.unshift(j);l.state="generating";
+  audit("—",OUT_META[kind].label+" 생성 시작: "+id,"AI 엔진","원본 "+l.id+(target?" · 대상 "+target.id+" "+target.name:"")+" · "+Object.values(vParams).join(" · "));
+  vJobSel=null;vParams=null;vOutType=null;vDocTarget=null;render();
+  const steps=kind==="video"
+   ?[[30,"extracting","텍스트 추출 중"],[55,"generating","스크립트 재구성 중"],[80,"generating","장면 생성·렌더링 중"],[100,"ready","완료"]]
+   :[[30,"extracting","텍스트 추출 중"],[60,"generating","문서 구성 중"],[85,"generating","서식·출처표기 적용 중"],[100,"ready","완료"]];
+  let si=0;
+  const t=setInterval(()=>{
+    const s=steps[si++];j.progress=s[0];j.state=s[1];j.stageLabel=s[2];
+    /* 추출이 끝나는 순간 텍스트를 중간 소재로 저장 — 이후 산출물들이 이 텍스트를 재사용한다 */
+    if(s[1]==="generating"&&!j.textSaved){j.textSaved=true;
+      audit("—","추출 텍스트 저장: "+j.link,"시스템(스튜디오)","폴더 “"+DB.videos.textFolder+"” · 원본 "+l.url+" · 승인 근거 메타 포함 — 영상·문서 생성에 재사용");}
+    if(s[1]==="ready"){
+      j.out=kind==="video"?{dur:"09:12",size:"128MB",format:"mp4"}:{pages:"12쪽",size:"1.2MB",format:"docx"};
+      const src=DB.videos.links.find(x=>x.id===j.link);src.state="generated";
+      audit("—",OUT_META[kind].label+" 생성 완료: "+j.id,"AI 엔진",j.title+" · "+(j.out.dur||j.out.pages)+" · 원본·승인 근거 메타 포함");
+      toastMsg("생성 완료 — 업로드 대기로 보낼 수 있습니다");clearInterval(t);}
+    if(workspace==="video")render();
+  },1600);
+}
+/* 게시: 영상은 문서 대기열에 섞지 않고 '영상 전용 적재 트랙'으로 분기한다.
+   비가역·취소 구간·RAG·Viva 동시 전파 원칙은 문서 게이트와 동일 — 놓는 곳(폴더·화면)만 분리.
+   레벨은 승인 근거에서 상속 — own→L1, ccby→L2(출처표기), granted→L4+원장 라이선스. */
+function vFileName(j,lv,licId){
+  const t=sanitizeTitle(j.title);
+  return DB.settings.naming?t+" [AI365-"+j.id+"·L"+lv+(licId?"·"+licId:"")+"]."+j.out.format:t+"."+j.out.format;
+}
+function vFolderFor(j){return (j.kind||"video")==="video"?DB.videos.folder:DB.videos.docFolder;}
+function sendVJob(id){
+  const j=DB.videos.jobs.find(x=>x.id===id),l=DB.videos.links.find(x=>x.id===j.link);
+  const lv=l.licBasis.k==="own"?1:l.licBasis.k==="ccby"?2:4;
+  j.lv=lv;j.licId=l.licBasis.licId||null;j.basisLabel=l.licBasis.label;j.srcUrl=l.url;
+  j.spName=vFileName(j,lv,j.licId);
+  j.stagedTotal=delayMs();j.stagedUntil=Date.now()+j.stagedTotal;j.state="staged";
+  audit(j.title,OUT_META[j.kind||"video"].label+" 업로드 대기 — "+delayLabel()+" (이 구간에서만 취소 가능)","관리자",
+   "스튜디오 전용 적재 트랙 · 근거 "+l.licBasis.label+(j.licId?" ("+j.licId+")":"")+" · 원본 "+l.id+" · 폴더 “"+vFolderFor(j)+"”");
+  toastMsg("업로드 대기로 이동 — 게시 현황에서 카운트다운·취소가 가능합니다");
+  vTab="publish";render();
+}
+function cancelVJobStage(id){
+  const j=DB.videos.jobs.find(x=>x.id===id);
+  j.state="ready";j.stagedUntil=null;
+  audit(j.title,"영상 업로드 취소 — 생성 완료 상태로 복귀","관리자","취소 가능 구간 내 중단");
+  toastMsg("업로드를 취소했습니다");render();
+}
+/* 스튜디오 업로드 확정 — 교육 에이전트 파이프라인과 동일하게 비가역. 회수·삭제 경로는 존재하지 않는다.
+   '기존 문서 업데이트'는 이 순간 신규 버전으로 확정된다 — 수정이 아니라 버전 적재.
+   구버전은 SharePoint에 영구 보존되고, Viva 노출만 신버전으로 전환된다(learningContent.isActive 전환 컨셉). */
+function doVUpload(j,by){
+  j.state="uploaded";j.uploadedAt=nowHM();j.dist={rag:true,viva:true};
+  DB.uploads.push({t:j.uploadedAt,doc:j.title,name:j.spName,hash:"sha256:"+j.id.toLowerCase()+"e7f2…",lic:j.licId||"—",folder:vFolderFor(j)});
+  audit(j.title,OUT_META[j.kind||"video"].label+" SharePoint 업로드(비가역) → RAG·Viva 동시 배포",by,"폴더 “"+vFolderFor(j)+"” · 파일명 "+j.spName+" · 원본·승인 근거 메타 포함");
+  if(j.kind==="updatedoc"&&j.target){
+    const d=DB.videos.docs.find(x=>x.id===j.target);
+    if(d){d.ver++;d.note="최근 갱신 "+addDays(0)+" · "+j.id+" 생성 개정";
+      audit(d.name,"사내 문서 버전 갱신 — v"+(d.ver-1)+" → v"+d.ver,"시스템(스튜디오)","구버전은 SharePoint 영구 보존 · Viva 노출만 신버전으로 전환");}
+  }
+}
+function vKindChip(j){const k=j.kind||"video";return '<span class="sig'+(k==="video"?"":" ok")+'">'+ic(OUT_META[k].icon,10)+OUT_META[k].label+'</span>';}
+function vPublishHTML(){
+  const staged=DB.videos.jobs.filter(j=>j.state==="staged");
+  const up=DB.videos.jobs.filter(j=>j.state==="uploaded");
+  let html='<div class="setgrp"><div class="setgrp-t">'+ic("folder",14)+' 저장 위치 — SharePoint (교육 에이전트 파이프라인과 분리)</div>'+
+   '<div class="setgrp-d">승인된 영상에서 <b>추출한 텍스트가 먼저 소재로 저장</b>되고, 그 텍스트를 기반으로 영상 재제작·문서 생성·기존 문서 업데이트가 이뤄집니다. 산출물은 영상·문서 각각의 전용 폴더에 적재되며, 적재 순간 <b>RAG·Viva Learning 동시 전파(분리 불가)</b>는 동일합니다. 스튜디오 설정의 값과 같은 값을 봅니다.</div>'+
+   '<div class="rule"><span style="min-width:82px;font-size:12px;font-weight:700">사이트 링크</span><input value="'+esc(DB.videos.spUrl)+'" onchange="DB.videos.spUrl=this.value;audit(\'—\',\'연동 변경: 스튜디오 SP 링크\',\'관리자\',this.value);toastMsg(\'저장\')" /></div>'+
+   '<div class="rule"><span style="min-width:82px;font-size:12px;font-weight:700">추출 텍스트</span><input value="'+esc(DB.videos.textFolder)+'" onchange="DB.videos.textFolder=this.value;audit(\'—\',\'설정 변경: 추출 텍스트 폴더\',\'관리자\',this.value);toastMsg(\'저장\')" /><span class="sig" title="추출 텍스트는 산출물이 아니라 중간 소재입니다 — 같은 승인 근거로 영상·문서 생성에 재사용되며, 원본 링크·승인 근거 메타와 함께 보관됩니다">'+ic("scan-text",10)+'중간 소재</span></div>'+
+   '<div class="rule"><span style="min-width:82px;font-size:12px;font-weight:700">영상 폴더</span><input value="'+esc(DB.videos.folder)+'" onchange="DB.videos.folder=this.value;audit(\'—\',\'설정 변경: 영상 대상 폴더\',\'관리자\',this.value);toastMsg(\'저장\')" /></div>'+
+   '<div class="rule"><span style="min-width:82px;font-size:12px;font-weight:700">문서 폴더</span><input value="'+esc(DB.videos.docFolder)+'" onchange="DB.videos.docFolder=this.value;audit(\'—\',\'설정 변경: 문서 대상 폴더\',\'관리자\',this.value);toastMsg(\'저장\')" /></div></div>';
+  html+='<div class="toolbar"><b style="font-size:12.5px">업로드 대기 '+staged.length+'건</b><span style="font-size:11.5px;color:var(--t3)">— 취소할 수 있는 마지막 구간 · 만료 시 자동 업로드(비가역)</span></div>';
+  html+=staged.length?staged.map(j=>{
+    const left=Math.max(0,Math.ceil((j.stagedUntil-Date.now())/1000));
+    const p=j.stagedTotal?Math.max(0,Math.min(100,100-((j.stagedUntil-Date.now())/j.stagedTotal*100))):100;
+    return '<div class="vjob"><div style="flex:none">'+ic("clock",16)+'</div>'+
+     '<div style="flex:1.1;min-width:0"><div style="font-weight:800;font-size:12.5px">'+esc(j.title)+' <span class="lv l'+j.lv+'">L'+j.lv+'</span></div>'+
+      '<div class="yt-meta">'+vKindChip(j)+'근거 '+esc(j.basisLabel)+(j.licId?" · "+esc(j.licId):"")+' · 파일명 '+esc(j.spName)+'</div></div>'+
+     '<div class="bar"><i style="width:'+p+'%"></i></div><span style="font-size:11.5px;font-weight:800;width:40px;text-align:right">'+left+'초</span>'+
+     '<button class="rbtn" onclick="cancelVJobStage(\''+j.id+'\')">'+ic("x",13)+' 취소</button></div>';}).join("")
+   :'<div class="empty" style="padding:20px">대기 중인 산출물이 없습니다.</div>';
+  html+='<div class="toolbar" style="margin-top:14px"><b style="font-size:12.5px">게시 적재함 '+up.length+'건</b><span style="font-size:11.5px;color:var(--t3)">— 업로드 후에는 회수할 수 없습니다(비가역)</span></div>';
+  html+=up.length?up.map(j=>
+    '<div class="vjob"><div style="flex:none">'+ic("database",16)+'</div>'+
+    '<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12.5px">'+esc(j.title)+' <span class="lv l'+j.lv+'">L'+j.lv+'</span></div>'+
+     '<div class="yt-meta">'+vKindChip(j)+esc(j.uploadedAt)+' 적재 · 폴더 '+esc(vFolderFor(j))+' · '+esc(j.spName)+'</div></div>'+
+    '<span class="sig ok">'+ic("check-check",10)+'SP · RAG · Viva</span></div>').join("")
+   :'<div class="empty" style="padding:20px">적재된 산출물이 없습니다 — 스튜디오에서 생성을 완료하고 업로드 대기로 보내면 여기로 모입니다.</div>';
+  return html;
+}
+/* ── 사내 교육 문서함 — 자사 저작물 마스터. 업데이트 대상 선택·다운로드 가능 ──
+   여기는 WORM 적재함이 아니라 사용자가 관리하는 원본 서고다. 외부 자료는 올리지 않는다(개작권 우회 방지). */
+let _mdBlobs={};
+function vDocsHTML(){
+  return '<div class="toolbar"><span style="font-size:12.5px;color:var(--t2);line-height:1.6"><b>자사 저작물 전용</b> 원본 서고입니다 — 생성 스튜디오의 “기존 문서 업데이트”가 여기서 대상을 고릅니다. 갱신은 수정이 아니라 <b>신규 버전 적재</b>로 처리되며, 구버전은 SharePoint에 영구 보존됩니다. 외부 자료는 여기 올리지 마세요 — 저작권 판정 없이 개작되는 경로가 되기 때문에, 외부 자료는 교육 에이전트 파이프라인을 거칩니다.</span></div>'+
+  '<div class="toolbar"><input type="file" id="md-file" multiple style="display:none" onchange="mdUpload(this)" />'+
+   '<button class="btn primary sm" onclick="document.getElementById(\'md-file\').click()">'+ic("plus",13)+'문서 등록 (복수 가능)</button>'+
+   '<span style="font-size:11.5px;color:var(--t3)">docx · pptx · pdf — 등록 즉시 업데이트 대상으로 선택할 수 있습니다</span></div>'+
+  (DB.videos.docs.length?DB.videos.docs.map(d=>
+   '<div class="vjob"><div style="flex:none">'+ic("file-text",16)+'</div>'+
+    '<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12.5px">'+esc(d.name)+' <span class="tpill">v'+d.ver+'</span></div>'+
+     '<div class="yt-meta">'+esc(d.owner||"관리자")+' · 등록 '+esc(d.added)+' · '+esc(d.size)+' · '+esc(d.note||"")+'</div></div>'+
+    '<button class="rbtn ok" onclick="vTab=\'studio\';vOutType=\'updatedoc\';vDocTarget=\''+d.id+'\';vParams={};render();toastMsg(\'생성 스튜디오에서 승인된 링크를 먼저 선택해주세요\')">'+ic("layers",13)+' 이 문서 갱신</button>'+
+    '<button class="rbtn" onclick="mdDownload(\''+d.id+'\')">'+ic("arrow-right",13)+' 다운로드</button>'+
+    '<button class="rbtn" onclick="mdRemove(\''+d.id+'\')">'+ic("trash-2",13)+'</button></div>').join("")
+   :'<div class="empty">'+ic("file-text",22)+'<p>등록된 문서가 없습니다 — 사내 교육 문서를 올리면 업데이트 대상으로 고를 수 있습니다.</p></div>');
+}
+function mdUpload(inp){
+  const files=inp.files;if(!files||!files.length)return;
+  for(let i=0;i<files.length;i++){
+    const f=files[i],id="MD-"+String(DB.videos.docs.length+1).padStart(3,"0");
+    DB.videos.docs.unshift({id,name:f.name,size:(f.size/1048576).toFixed(1)+"MB",owner:"관리자",added:addDays(0),ver:1,note:"초판"});
+    _mdBlobs[id]=f;
+    audit("—","사내 문서 등록: "+id,"관리자",f.name+" · 자사 저작물 · 업데이트 대상 후보");
+  }
+  inp.value="";toastMsg(files.length+"건 등록 — 생성 스튜디오에서 갱신 대상으로 선택할 수 있습니다");render();
+}
+function mdDownload(id){
+  const d=DB.videos.docs.find(x=>x.id===id);if(!d)return;
+  if(typeof URL==="undefined"||!URL.createObjectURL){toastMsg("이 환경에서는 다운로드가 지원되지 않습니다");return;}
+  const blob=_mdBlobs[id]||new Blob(["[데모 문서] "+d.name+" — v"+d.ver+"\n실제 구현에서는 SharePoint 원본이 내려옵니다."],{type:"text/plain"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=d.name;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  audit("—","사내 문서 다운로드: "+id,"관리자",d.name+" v"+d.ver);
+}
+function mdRemove(id){
+  const d=DB.videos.docs.find(x=>x.id===id);if(!d)return;
+  DB.videos.docs.splice(DB.videos.docs.indexOf(d),1);delete _mdBlobs[id];
+  audit("—","사내 문서 등록 해제: "+id,"관리자",d.name+" — 서고 목록에서 제거(기적재 버전은 SharePoint에 보존)");
+  toastMsg("문서함에서 제거했습니다 — 이미 적재된 버전은 남습니다");render();
+}
+/* ══ 교육 대시보드 — Viva Learning 교육 따라가기 ══
+   [BACKEND] Graph API: Viva Learning 학습 기록 × Entra 조직 데이터 조인. 데모는 정적 표본. */
+/* 주간 추이 — 인라인 SVG 그룹 컬럼. 헤어라인 그리드·4px 라운드 캡(베이스라인은 직각)·
+   마지막 주만 직접 라벨(선택적 라벨링)·주 단위 호버 툴팁. 색은 검증 통과 조합(--viz-1/--viz-2). */
+function eduWeekSvg(E){
+  /* 컨테이너 실폭에 맞춰 그린다 — 고정폭 SVG는 넓은 화면에서 카드 오른쪽이 비어 보인다 */
+  const appEl=document.getElementById("app");
+  const W=Math.max(560,(appEl&&appEl.clientWidth?appEl.clientWidth:1020)-72);
+  const H=196,padL=34,padR=10,padT=18,padB=24,yMax=35;
+  const ih=H-padT-padB,y0=padT+ih,y=v=>y0-(v/yMax*ih);
+  const gw=(W-padL-padR)/E.weeks.length;
+  const bw=Math.min(22,Math.max(13,Math.round(gw*0.16))),gap=3;
+  const col=(x,v,c)=>{const yy=y(v),r=Math.min(4,y0-yy);
+    return '<path d="M'+x+' '+y0+' V'+(yy+r)+' Q'+x+' '+yy+' '+(x+r)+' '+yy+' H'+(x+bw-r)+' Q'+(x+bw)+' '+yy+' '+(x+bw)+' '+(yy+r)+' V'+y0+' Z" fill="'+c+'"/>';};
+  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="xMidYMid meet" style="display:block" role="img" aria-label="주간 수강 추이 — 최근 8주 시작·완료 건수">';
+  [0,10,20,30].forEach(t=>{s+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y(t)+'" y2="'+y(t)+'" stroke="'+(t===0?"var(--viz-axis)":"var(--viz-grid)")+'" stroke-width="1"/>'+
+   '<text x="'+(padL-6)+'" y="'+(y(t)+3)+'" text-anchor="end" font-size="9" fill="var(--t3)" font-variant-numeric="tabular-nums">'+t+'</text>';});
+  E.weeks.forEach((wk,i)=>{
+    const cx=padL+gw*i+gw/2,x1=cx-bw-gap/2,x2=cx+gap/2,last=i===E.weeks.length-1;
+    s+=col(x1,wk.s,"var(--viz-1)")+col(x2,wk.c,"var(--viz-2)");
+    if(last)s+='<text x="'+(x1+bw/2)+'" y="'+(y(wk.s)-4)+'" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--t2)">'+wk.s+'</text>'+
+     '<text x="'+(x2+bw/2)+'" y="'+(y(wk.c)-4)+'" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--t2)">'+wk.c+'</text>';
+    s+='<text x="'+cx+'" y="'+(H-7)+'" text-anchor="middle" font-size="9" fill="var(--t3)">'+esc(wk.w)+'</text>'+
+     '<rect class="wkhit" x="'+(padL+gw*i)+'" y="'+padT+'" width="'+gw+'" height="'+ih+'" fill="transparent" data-tip="'+esc(wk.w)+' 주 — 수강 시작 '+wk.s+'건 · 완료 '+wk.c+'건"/>';
+  });
+  return s+'</svg>';
+}
+/* 12포인트 미니 스파크라인 — 회색 궤적 + 마지막 점만 강조(현재값) */
+function sparkSvg(data,accent){
+  const w=58,h=20,pad=2;
+  const mn=Math.min.apply(null,data),mx=Math.max.apply(null,data),sp=(mx-mn)||1;
+  const pts=data.map((v,i)=>((pad+i*(w-pad*2)/(data.length-1)).toFixed(1))+","+((h-pad-(v-mn)/sp*(h-pad*2)).toFixed(1)));
+  const last=pts[pts.length-1].split(",");
+  return '<svg class="spark" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" aria-hidden="true">'+
+   '<polyline points="'+pts.join(" ")+'" fill="none" stroke="#C9CDD6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'+
+   '<circle cx="'+last[0]+'" cy="'+last[1]+'" r="2.6" fill="'+(accent||"var(--viz-1)")+'" stroke="#fff" stroke-width="1.5"/></svg>';
+}
+function eduKpi(icon,label,valHtml,delta,dir,hint,spark){
+  return '<div class="ekpi"><div class="lb">'+ic(icon,12)+esc(label)+'</div><div class="val">'+valHtml+'</div>'+
+   '<div class="foot">'+(delta?'<span class="delta '+dir+'">'+esc(delta)+'</span>':'')+
+   (hint?'<span class="hint">'+esc(hint)+'</span>':'')+(spark||'')+'</div></div>';
+}
+function renderEduWs(){
+  const E=DB.edu,app=document.getElementById("app");
+  /* 막대는 단일 색(크기 비교), 진도 50% 미만은 상태 신호 — 색만이 아니라 아이콘+수치로 함께 표시.
+     avg를 주면 전사 평균 기준선 틱이 트랙 위에 붙는다. */
+  const bar=(n,p,avg)=>'<div class="hbar" data-tip="'+esc(n)+' — 이수율 '+p+'%'+(avg?' (전사 평균 '+avg+'%)':'')+(p<50?" · 진도 미달(50% 미만)":"")+'"><span class="lb" title="'+esc(n)+'">'+esc(n)+'</span><span class="tr"><i style="width:'+p+'%"></i>'+(avg?'<span class="avg" style="left:'+avg+'%"></span>':'')+'</span><span class="pc'+(p<50?" low":"")+'">'+(p<50?ic("alert-triangle",10):"")+p+'%</span></div>';
+  app.innerHTML=
+  '<div class="hd"><div class="hd-l"><svg class="kd-svg" viewBox="0 0 30 20" fill="none" aria-label="Ai 365 로고"><path d="M5.83407 19.994H5.80736C2.72101 19.9789 0.174765 17.5252 0.00857675 14.4069C-0.077485 12.765 0.486368 11.2043 1.59924 10.0166C2.7121 8.82576 4.2167 8.17022 5.83407 8.17022C6.0329 8.17022 6.23173 8.17924 6.43057 8.20029C6.31186 7.59286 6.27625 6.96739 6.32373 6.33891C6.57301 3.03415 9.21422 0.321782 12.4697 0.0270903C15.1465 -0.213475 17.7195 1.16376 19.0223 3.53633C19.2508 3.95431 19.1024 4.48356 18.6899 4.7151C18.2774 4.94664 17.7551 4.79629 17.5266 4.37831C16.5502 2.60414 14.6302 1.57272 12.6211 1.75314C10.1906 1.97266 8.21709 3.99942 8.03013 6.46822C7.97968 7.12376 8.0509 7.76727 8.23786 8.38672C8.37141 8.82275 8.26457 9.30087 7.9589 9.63165C7.65324 9.96543 7.19028 10.1068 6.75404 10.0075C6.45431 9.93837 6.14567 9.90228 5.83407 9.90228C4.69152 9.90228 3.62614 10.3654 2.83971 11.2073C2.05329 12.0493 1.65562 13.1499 1.71497 14.3136C1.83071 16.4787 3.66769 18.2499 5.81329 18.2619C6.0329 18.2619 6.25251 18.2469 6.46618 18.2138C6.93507 18.1386 7.37131 18.4664 7.44253 18.9385C7.51376 19.4106 7.19325 19.8557 6.72733 19.9278C6.43353 19.9729 6.1338 19.997 5.83407 19.997V19.994Z" fill="url(#lg1)"/><path d="M9.89101 19.9941C9.70999 19.9941 9.52896 19.9369 9.37464 19.8167C8.99775 19.528 8.92653 18.9837 9.21142 18.6018L17.5743 7.47267C17.5743 7.47267 17.5772 7.46665 17.5802 7.46365C18.5654 6.07438 20.162 5.33465 21.8477 5.49402C24.0497 5.69549 25.8332 7.45763 26.0884 9.67684C26.1715 10.4015 26.0944 11.1293 25.8629 11.8089C26.8749 11.869 27.8186 12.317 28.5367 13.0808C29.2965 13.8867 29.6941 14.9332 29.6615 16.0278C29.5932 18.253 27.8186 19.9971 25.6195 19.9971H18.3132C17.8413 19.9971 17.4585 19.6092 17.4585 19.131C17.4585 18.6529 17.8413 18.265 18.3132 18.265H25.6195C26.8867 18.265 27.9106 17.2607 27.9491 15.9766C27.967 15.3512 27.7355 14.7468 27.2963 14.2807C26.8571 13.8146 26.2754 13.5499 25.6581 13.5409C25.5988 13.5409 25.5424 13.5409 25.486 13.5439C24.931 13.574 24.4562 13.3575 24.1862 12.9515C23.9191 12.5516 23.8983 12.0374 24.1268 11.5412C24.3642 11.03 24.4533 10.4587 24.388 9.88433C24.2247 8.47402 23.0911 7.35539 21.6933 7.22609C20.628 7.12986 19.619 7.58694 18.9898 8.45598C18.9809 8.47101 18.969 8.48605 18.9572 8.50108L10.5736 19.6573C10.4044 19.8798 10.1492 20.0001 9.89101 20.0001V19.9941Z" fill="url(#lg2)"/><defs><linearGradient id="lg1" x1="0" y1="9.99851" x2="19.1291" y2="9.99851" gradientUnits="userSpaceOnUse"><stop stop-color="#5361AA"/><stop offset="1" stop-color="#495495"/></linearGradient><linearGradient id="lg2" x1="9.03633" y1="12.732" x2="29.6615" y2="12.732" gradientUnits="userSpaceOnUse"><stop stop-color="#EAA923"/><stop offset="1" stop-color="#DD7117"/></linearGradient></defs></svg>'+
+    '<div><div class="brand"><b>Ai 365</b><span>교육 대시보드</span></div>'+
+    '<div class="hd-sub">Viva Learning 학습 기록 × 조직 데이터 — '+esc(E.asOf)+' · 읽기 전용</div></div>'+wsSeg()+'</div>'+
+    '<div class="hd-r"></div></div>'+
+  '<div class="kpis">'+
+    eduKpi("layers","게시 교육 콘텐츠",E.kpis.courses+'<small>건</small>',E.deltas.courses,"up","Viva Learning 자동 게시")+
+    eduKpi("user","학습 대상자",E.kpis.learners+'<small>명</small>',E.deltas.learners,"up","배정·수강 (중복 제거)")+
+    eduKpi("check-check","전사 이수율",E.kpis.doneRate+'<small>%</small>',E.deltas.done,"up","완료 상태 기준",sparkSvg(E.sparks.done))+
+    eduKpi("bell-ring","이번 주 신규 수강",E.kpis.weekNew+'<small>건</small>',E.deltas.week,"up","최근 7일 시작·배정",sparkSvg(E.sparks.week))+
+    eduKpi("alert-triangle","마감 관리 대상",(E.kpis.overdue+E.kpis.dueSoon)+'<small>건</small>',E.deltas.dead,"up","기한 초과 "+E.kpis.overdue+" · 임박(D-7) "+E.kpis.dueSoon)+
+  '</div>'+
+  '<div class="edu-strip">'+
+   '<div class="estat"><div class="el">'+ic("shield-check",12)+' 필수 과정 이수율</div><div class="en">'+E.strip.requiredRate+'<small>%</small></div><div class="eh">배정 유형이 “필수”인 과정만 집계</div></div>'+
+   '<div class="estat"><div class="el">'+ic("loader-2",12)+' 진행 중 인원</div><div class="en">'+E.strip.inProgress+'<small>명</small></div><div class="eh">상태가 진행 중인 학습자</div></div>'+
+   '<div class="estat"><div class="el">'+ic("clock",12)+' 이수 완료 총 분량</div><div class="en">'+E.strip.doneHours+'<small>시간</small></div><div class="eh">완료 콘텐츠의 길이 합산 — 시청 시간이 아닌 콘텐츠 분량 기준</div></div>'+
+   '<div class="estat"><div class="el">'+ic("sparkles",12)+' 자기주도 학습 비중</div><div class="en">'+E.strip.selfRatio+'<small>%</small></div><div class="eh">배정 없이 스스로 시작한 수강의 비율</div></div>'+
+  '</div>'+
+  '<div class="edu-grid">'+
+   '<div class="edu-card"><h4>'+ic("chart-column",14)+' 부서별 이수율<span class="cap">┃ 전사 평균 '+E.kpis.doneRate+'%</span></h4>'+E.depts.map(d=>bar(d.n,d.p,E.kpis.doneRate)).join("")+'</div>'+
+   '<div class="edu-card"><h4>'+ic("user",14)+' 교육 따라가기 — 팀 진도<span class="cap">┃ 전사 평균 '+E.kpis.doneRate+'%</span></h4>'+E.team.map(m=>bar(m.n,m.p,E.kpis.doneRate)).join("")+
+    '<div class="setgrp-d" style="margin-top:8px">'+ic("alert-triangle",10)+' 표시(진도 50% 미만) 인원에게는 Viva Learning 리마인더가 자동 발송됩니다.</div></div>'+
+  '</div>'+
+  '<div class="edu-card" style="margin-bottom:12px"><h4>'+ic("chart-column",14)+' 주간 수강 추이<span class="cap">최근 8주 · 건수</span></h4>'+
+   eduWeekSvg(E)+
+   '<div class="vleg"><span><i></i>수강 시작</span><span><i class="done"></i>완료</span></div></div>'+
+  '<div class="edu-grid">'+
+   '<div class="edu-card"><h4>'+ic("scan-text",14)+' 스킬 태그별 학습 분포<span class="cap">콘텐츠 태그 집계</span></h4>'+
+    (function(){const mx=Math.max.apply(null,E.skills.map(s=>s.v));
+     return E.skills.map(s=>'<div class="hbar" data-tip="'+esc(s.n)+' — 콘텐츠 '+s.v+'건"><span class="lb" title="'+esc(s.n)+'">'+esc(s.n)+'</span><span class="tr"><i style="width:'+Math.round(s.v/mx*100)+'%"></i></span><span class="pc">'+s.v+'건</span></div>').join("");})()+
+    '<div class="setgrp-d" style="margin-top:8px">콘텐츠의 스킬 태그 집계 — 우리 조직이 지금 무엇을 배우고 있는지 보여줍니다.</div></div>'+
+   '<div class="edu-card"><h4>'+ic("user",14)+' 배정자별 현황<span class="cap">이수 책임 소재</span></h4>'+
+    '<div style="overflow-x:auto"><table class="edu-tbl"><tr><th>배정자</th><th>배정</th><th style="min-width:120px">이수율</th></tr>'+
+    E.assigners.map(a=>'<tr data-tip="'+esc(a.n)+' — 배정 '+a.cnt+'건 · 이수율 '+a.p+'%"><td style="font-weight:700;white-space:nowrap">'+esc(a.n)+'<span style="color:var(--t3);font-weight:400"> · '+esc(a.dept)+'</span></td><td>'+a.cnt+'건</td>'+
+     '<td><div class="hbar" style="grid-template-columns:1fr 38px;margin:0"><span class="tr"><i style="width:'+a.p+'%"></i></span><span class="pc">'+a.p+'%</span></div></td></tr>').join("")+
+    '</table></div>'+
+    '<div class="setgrp-d" style="margin-top:8px">누가 배정한 교육이 잘 이수되는지 — 교육 운영의 책임 소재를 보여줍니다.</div></div>'+
+  '</div>'+
+  '<div class="edu-grid">'+
+   '<div class="edu-card"><h4>'+ic("alert-triangle",14)+' 마감 임박·기한 초과<span class="cap">초과 우선 정렬</span></h4>'+
+    '<div style="overflow-x:auto"><table class="edu-tbl"><tr><th>학습자</th><th>콘텐츠</th><th>배정</th><th>마감</th></tr>'+
+    E.deadlines.map(d=>'<tr><td style="font-weight:700;white-space:nowrap"><span class="avx">'+esc(d.n.charAt(0))+'</span>'+esc(d.n)+'<span style="color:var(--t3);font-weight:400"> · '+esc(d.dept)+'</span></td>'+
+     '<td>'+esc(d.c)+'</td><td><span class="sig'+(d.type==="필수"?" risk":"")+'">'+esc(d.type)+'</span></td>'+
+     '<td><span class="duep '+(d.due<0?"over":"soon")+'">'+(d.due<0?("초과 "+(-d.due)+"일"):("D-"+d.due))+'</span></td></tr>').join("")+
+    '</table></div>'+
+    '<div class="setgrp-d" style="margin-top:8px">배정 마감일 기준 — 기한 초과가 위, 임박(D-7)이 아래로 정렬됩니다.</div></div>'+
+   '<div class="edu-card"><h4>'+ic("send",14)+' 출처별 교육 성과</h4>'+
+    (function(){const a=E.srcCompare[0],b=E.srcCompare[1],diff=b.doneRate-a.doneRate;
+     return '<div class="vsrow"><div><div class="vsnum">'+a.doneRate+'<small style="font-size:13px;color:var(--t3)">%</small></div><div class="vslb">'+esc(a.label)+'</div></div>'+
+      '<span class="vsmid">vs</span>'+
+      '<div><div class="vsnum" style="color:var(--viz-2)">'+b.doneRate+'<small style="font-size:13px;color:var(--t3)">%</small></div><div class="vslb">'+esc(b.label)+' <b style="color:var(--ok)">+'+diff+'%p</b></div></div></div>';})()+
+    E.srcCompare.map(s=>{const g=s.label.indexOf("동영상")>=0;
+     return '<div style="margin-bottom:10px" data-tip="'+esc(s.label)+' — 콘텐츠 '+s.n+'개 · 수강 '+s.taken+'건 · 완주율 '+s.doneRate+'%"><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;color:var(--t2)"><b>'+esc(s.label)+'</b><span style="color:var(--t3)">콘텐츠 '+s.n+' · 수강 '+s.taken+'</span></div>'+
+     '<div class="hbar'+(g?" g":"")+'" style="grid-template-columns:1fr 44px;margin:0"><span class="tr"><i style="width:'+s.doneRate+'%"></i></span><span class="pc">'+s.doneRate+'%</span></div></div>';}).join("")+
+    '<div class="setgrp-d" style="margin-top:4px">완주율 비교 — 같은 주제라도 <b>생성 동영상</b>의 완주율이 높다면, 콘텐츠 스튜디오의 교육 기여를 수치로 보일 수 있습니다.</div></div>'+
+  '</div>'+
+  '<div class="edu-card"><h4>'+ic("layers",14)+' 콘텐츠별 수강·완주</h4>'+
+   '<div style="overflow-x:auto"><table class="edu-tbl"><tr><th>콘텐츠</th><th>출처</th><th>배정</th><th>수강</th><th>완주</th><th style="min-width:130px">완주율</th></tr>'+
+   E.courses.map(cs=>{const p=Math.round(cs.done/cs.taken*100);
+     return '<tr><td style="font-weight:700">'+esc(cs.t)+'</td><td><span class="sig'+(cs.src==="생성 동영상"?" ok":"")+'">'+esc(cs.src)+'</span></td><td><span class="sig'+(cs.type==="필수"?" risk":"")+'">'+esc(cs.type)+'</span></td><td>'+cs.taken+'</td><td>'+cs.done+'</td>'+
+     '<td><div class="hbar" style="grid-template-columns:1fr 38px;margin:0"><span class="tr"><i style="width:'+p+'%"></i></span><span class="pc">'+p+'%</span></div></td></tr>';}).join("")+
+   '</table></div>'+
+   '<div class="setgrp-d" style="margin-top:8px">출처가 “생성 동영상”인 콘텐츠는 콘텐츠 스튜디오에서 만들어져 적재된 것입니다 — 수집·생성·교육이 한 파이프라인으로 이어집니다.</div></div>';
+}
+
+/* 창 크기 변경 시 대시보드 차트를 새 폭으로 다시 그린다 */
+let _eduRsz=null;
+window.addEventListener("resize",function(){
+  clearTimeout(_eduRsz);
+  _eduRsz=setTimeout(function(){if(workspace==="edu")render();},150);
+});
+/* 차트 호버 툴팁 — data-tip 위임 방식이라 재렌더에도 살아남는다 */
+document.addEventListener("mousemove",function(e){
+  const tip=document.getElementById("viztip");if(!tip)return;
+  const t=e.target&&e.target.closest?e.target.closest("[data-tip]"):null;
+  if(t){tip.textContent=t.getAttribute("data-tip");tip.style.opacity="1";
+    let x=e.clientX+12,y=e.clientY+14;
+    const r=tip.getBoundingClientRect();
+    if(x+r.width>window.innerWidth-8)x=e.clientX-r.width-12;
+    if(y+r.height>window.innerHeight-8)y=e.clientY-r.height-14;
+    tip.style.left=x+"px";tip.style.top=y+"px";}
+  else tip.style.opacity="0";
+},{passive:true});
 
 /* 초기 렌더 */
 render();
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){if(dialog)closeDlg();else if(settingsOpen)closeSettings();return;}
+  if(e.key==="Escape"){if(dialog)closeDlg();else if(settingsOpen)closeSettings();else if(vSettingsOpen)closeVSettings();return;}
   /* 검토 대기 키보드 퀵 액션 — 다이얼로그·입력 중에는 비활성 */
-  if(dialog||settingsOpen)return;
+  if(dialog||settingsOpen||vSettingsOpen)return;
   const tag=((e.target&&e.target.tagName)||"").toLowerCase();
   if(tag==="input"||tag==="textarea"||tag==="select")return;
   if(activeView!=="queue")return;

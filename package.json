@@ -2,7 +2,7 @@
   "name": "ai365-knowledge-agent",
   "private": true,
   "scripts": {
-    "test": "node tests/flowtest4.js && node tests/flowtest5.js && node tests/flowtest6.js"
+    "test": "node tests/flowtest4.js && node tests/flowtest5.js && node tests/flowtest6.js && node tests/flowtest7.js"
   },
   "devDependencies": { "jsdom": "^24.0.0" }
 }

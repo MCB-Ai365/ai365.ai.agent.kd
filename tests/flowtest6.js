@@ -7,7 +7,7 @@ let pass=0,fail=0;
 const ok=(c,m)=>{if(c){pass++;}else{fail++;console.log("FAIL:",m);}};
 (async()=>{
 await sleep(120);
-// 표기 규칙 탭 — 기본 키워드 전시 + 사용자 추가
+// 표기 규칙 탭 - 기본 키워드 전시 + 사용자 추가
 E("openSettings()");E("switchMTab('lic')");
 let m=w.document.getElementById("modalroot").innerHTML;
 ok(m.indexOf("저작권 표기 탐지 키워드")>=0,"lic tab title");
@@ -24,7 +24,7 @@ ok(r==="CC-BY-4.0|uploaded","custom keyword fallback matched: "+r);
 const r2=E(`(function(){const d={lic:"무단 전재 및 재배포 금지",snapMark:"",lv:4,conf:90,source:"뉴스"};const ev=evaluate(d);return d.catalogId+"|"+ev.route;})()`);
 ok(r2==="KR-NEWS|held","builtin alias matched: "+r2);
 E("closeSettings()");
-// 개발 어휘 부재 검증 — 렌더된 전체 화면 + 5개 설정 탭
+// 개발 어휘 부재 검증 - 렌더된 전체 화면 + 5개 설정 탭
 let all=w.document.getElementById('app').innerHTML;
 ['queue','log','staging','archive','hold','ledger','audit'].forEach(v=>{E("setView('"+v+"')");all+=w.document.getElementById("view").innerHTML;});
 E("ledgerMode='cat';renderView()");all+=w.document.getElementById("view").innerHTML;

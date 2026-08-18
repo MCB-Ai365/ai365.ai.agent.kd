@@ -75,7 +75,7 @@ ok(E(`DB.docs.find(d=>d.id==='${sid}').spName`).indexOf("[AI365-")>=0,"filename 
 // ── 소스 계약 연결: 칩은 원장 근거로만, 판정은 명시 연결을 우선 ──
 const sh=E("sourcesHTML()");
 ok(sh.indexOf(">계약됨<")<0,"no self-declared 계약됨 chip");
-ok(sh.indexOf("계약 없음 — 문서별 판정")>=0&&sh.indexOf("자동 적재")>=0,"chip states from ledger");
+ok(sh.indexOf("계약 없음 - 문서별 판정")>=0&&sh.indexOf("자동 적재")>=0,"chip states from ledger");
 // 출처 문자열이 계약 범위와 안 맞아도 소스에 연결했으면 R10
 const good=E("DB.licenses.filter(l=>!l.revoked&&licCoversBundle(l)).map(l=>l.id)[0]");
 E(`DB.settings.sources.push({name:"사내 저널 미러 피드",url:"https://mirror.example",kind:"REST API",auth:"",licenseId:"${good}",schedule:"1일 1회",on:true})`);
@@ -99,7 +99,7 @@ E("saveLic()");
 ok(E("DB.settings.sources[0].licenseId")===E("DB.licenses[DB.licenses.length-1].id"),"lic form links checked source");
 
 // ── 범위(scope)는 조건부 필수 · 빈 범위는 아무것도 매칭하지 않는다 ──
-E('DB.licenses.push({id:"LIC-EMPTY",name:"범위 없는 계약",scope:"",uses:{internal:true,ai:true,education:true,redistribute:true,commercial:true},survival:true,start:addDays(-1),end:addDays(300),obligations:"—",contact:"—",file:"—",revoked:false})');
+E('DB.licenses.push({id:"LIC-EMPTY",name:"범위 없는 계약",scope:"",uses:{internal:true,ai:true,education:true,redistribute:true,commercial:true},survival:true,start:addDays(-1),end:addDays(300),obligations:"-",contact:"-",file:"-",revoked:false})');
 ok(E('DB.docs.filter(d=>scopeMatches(DB.licenses.find(l=>l.id==="LIC-EMPTY"),d)).length')===0,"empty scope matches no document");
 const rE=E(`(function(){const ev=evaluate({source:"아무 출처 XYZ",lic:"",lv:4,conf:90});return ev.route+"|"+(ev.lic||"-");})()`);
 ok(rE==="held|-","empty-scope license grants no R10: "+rE);

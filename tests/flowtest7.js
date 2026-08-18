@@ -26,7 +26,7 @@ ok(w.document.getElementById("view").innerHTML.indexOf("링크 목록")>=0,"inbo
 ok(w.document.querySelectorAll(".yt-card").length===5,"5 seed links");
 ok(w.document.getElementById("view").innerHTML.indexOf("2차적저작물")>=0,"derivative-work warning shown");
 
-// 수동 링크 추가 — 유튜브 아닌 URL 거부
+// 수동 링크 추가 - 유튜브 아닌 URL 거부
 w.document.getElementById("yt-url").value="https://vimeo.com/x";
 E("addYtLink()");
 ok(E("DB.videos.links.length")===5,"non-youtube rejected");
@@ -69,7 +69,7 @@ await sleep(7200); // 4 steps × 1600ms
 ok(E("DB.videos.jobs[0].state")==="ready","job completed");
 ok(E("DB.videos.links.find(l=>l.id==='YT-001').state")==="generated","link marked generated");
 
-// ── 게시: 영상 전용 트랙 분기 — 문서 대기열에 섞이지 않는다
+// ── 게시: 영상 전용 트랙 분기 - 문서 대기열에 섞이지 않는다
 const before=E("DB.docs.length");
 E("sendVJob(DB.videos.jobs[0].id)");
 ok(E("DB.docs.length")===before,"NO doc record created (separate track)");
@@ -183,7 +183,7 @@ ok(E("dialog")===null||E("dialog")===undefined||!E("dialog"),"no dialog reopen w
 E("setWorkspace('agent')");E("openSettings()");E("switchMTab('sources')");
 const sm=w.document.getElementById("modalroot").innerHTML;
 ok(sm.indexOf("문서 수집 소스")>=0,"doc settings: doc sources present");
-ok(sm.indexOf("동영상 수집 소스 — 링크만 수집")<0&&sm.indexOf("vs-query")<0,"doc settings: NO video source list");
+ok(sm.indexOf("동영상 수집 소스 - 링크만 수집")<0&&sm.indexOf("vs-query")<0,"doc settings: NO video source list");
 E("switchMTab('conn')");
 ok(w.document.getElementById("modalroot").innerHTML.indexOf("동영상 전용 SharePoint")<0,"doc conn: NO video SP block");
 E("closeSettings()");

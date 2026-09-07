@@ -219,15 +219,15 @@ const dn=E("DB.videos.docs.length");
 E("mdRemove('MD-004')");
 ok(E("DB.videos.docs.length")===dn-1&&E("DB.audit.some(a=>a.move.indexOf('사내 문서 등록 해제')>=0)"),"remove + audit");
 
-// ── 신규 교육 문서 생성 플로우 (YT-002 자사 채널 승인분 사용)
-E("vTab='studio';vJobSel='YT-002';vOutType='newdoc';vDocTarget=null;vParams={fmt:'요약 교재',aud:'신입·교육생',len:'2~3쪽 요약',lang:'한국어'};render()");
+// ── 신규 교육 문서 생성 플로우 (YT-005 CC-BY 승인분 사용)
+E("vTab='studio';vJobSel='YT-005';vOutType='newdoc';vDocTarget=null;vParams={fmt:'요약 교재',aud:'신입·교육생',len:'2~3쪽 요약',lang:'한국어'};render()");
 E("startVJob()");
 ok(E("DB.videos.jobs[0].kind")==="newdoc","newdoc job queued");
 await sleep(7200);
 ok(E("DB.videos.jobs[0].state")==="ready"&&E("DB.videos.jobs[0].out.format")==="docx","newdoc ready as docx");
 E("sendVJob(DB.videos.jobs[0].id)");
 ok(E("DB.videos.jobs[0].spName").indexOf(".docx")>=0,"doc filename pointer with docx ext");
-ok(E("DB.videos.jobs[0].lv")===1,"own-channel basis -> L1");
+ok(E("DB.videos.jobs[0].lv")===2,"ccby basis -> L2");
 // 문서 산출물은 문서 폴더로
 E("DB.videos.jobs[0].stagedUntil=Date.now()-1");
 await sleep(1300);
@@ -236,7 +236,7 @@ ok(E("DB.uploads.some(u=>u.folder==='교육자료 > 생성 교육문서')"),"doc
 
 // ── 기존 문서 업데이트 플로우: 업로드 확정 순간 버전이 오른다
 const verBefore=E("DB.videos.docs.find(d=>d.id==='MD-002').ver");
-E("vTab='studio';vJobSel='YT-002';vOutType='updatedoc';vDocTarget='MD-002';vParams={mode:'변경분만 반영',lang:'한국어'};render()");
+E("vTab='studio';vJobSel='YT-005';vOutType='updatedoc';vDocTarget='MD-002';vParams={mode:'변경분만 반영',lang:'한국어'};render()");
 ok(w.document.getElementById("view").innerHTML.indexOf("어떤 문서를 갱신할까요")>=0,"update target card shown");
 E("startVJob()");
 ok(E("DB.videos.jobs[0].kind")==="updatedoc"&&E("DB.videos.jobs[0].target")==="MD-002","update job with target");
